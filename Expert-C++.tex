@@ -9,6 +9,7 @@
 \date{\today}
 
 \usepackage{ctex} %导入中文包
+\usepackage{tocvsec2}
 
 \usepackage{graphicx}
 \usepackage{subfigure}
@@ -113,23 +114,50 @@
 	\begin{itemize}
 		\item github翻译地址：\href{https://github.com/xiaoweiChen/Expert-Cpp}{https://github.com/xiaoweiChen/Expert-Cpp}
 		\item 英文原版PDF：\href{https://zh.1lib.us/book/5537006/2e05c8}{https://zh.1lib.us/book/5537006/2e05c8}
-		%\item 英文原版PDF：\\
-		%\herf{https://zh.1lib.us/book/5537006/2e05c8}{}
-		%https://github.com/xiaoweiChen/Expert-Cpp
 	\end{itemize}
-
-
 	\newpage
 	
 	\tableofcontents
 	\newpage
 	
-	%\maketitle
-	\section{你好中国}
-	中国在 East Asia.
-	\subsection{Hello Beijing}
-	北京是 capital of China.
-	\subsubsection{Hello Dongcheng District}
-	\paragraph{Tian'anmen Square}
-	is in the center of Beijing
+	\setsecnumdepth{section}
+	\section{C++编程基础}
+		\subfile{content/Section-1/summary.tex}
+		\subsection{第1章：构建C++应用}
+			\subfile{content/Section-1/Chapter-1/chapter1.tex}
+		\subsection{第2章：C++底层编程}
+			\subfile{content/Section-1/Chapter-2/chapter2.tex}
+		\subsection{第3章：面向对象编程}
+			\subfile{content/Section-1/Chapter-3/chapter3.tex}
+		\subsection{第4章：了解并设计模板}
+			\subfile{content/Section-1/Chapter-4/chapter4.tex}
+		\subsection{第5章：内存管理和智能指针}
+			\subfile{content/Section-1/Chapter-5/chapter5.tex}
+	\section{设计健壮和高效的应用}
+		\subfile{content/Section-2/summary.tex}
+		\subsection{第6章：构建C++应用}
+			\subfile{content/Section-2/Chapter-6/chapter6.tex}
+		\subsection{第7章：C++底层编程}
+			\subfile{content/Section-2/Chapter-7/chapter7.tex}
+		\subsection{第8章：面向对象编程}
+			\subfile{content/Section-2/Chapter-8/chapter8.tex}
+		\subsection{第9章：了解并设计模板}
+			\subfile{content/Section-2/Chapter-9/chapter9.tex}
+		\subsection{第10章：内存管理和智能指针}
+			\subfile{content/Section-2/Chapter-10/chapter10.tex}
+		\subsection{第11章：构建C++应用}
+			\subfile{content/Section-2/Chapter-11/chapter11.tex}
+		\subsection{第12章：C++底层编程}
+			\subfile{content/Section-2/Chapter-12/chapter12.tex}
+		\subsection{第13章：面向对象编程}
+			\subfile{content/Section-2/Chapter-13/chapter13.tex}
+		\subsection{第14章：了解并设计模板}
+			\subfile{content/Section-2/Chapter-14/chapter14.tex}
+	\section{人工智能领域中的C++}
+		\subfile{content/Section-3/summary.tex}
+		\subsection{第15章：使用C++进行机器学习}
+			\subfile{content/Section-3/Chapter-15/chapter15.tex}
+		\subsection{第16章：实现一个交互式搜索引擎}
+			\subfile{content/Section-3/Chapter-16/chapter16.tex}
+
 \end{document}
