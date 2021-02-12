@@ -1,5 +1,5 @@
 # Expert C++
-*Become a proficient programmer by learning coding best practices with C++17 and C++20's latest features（来一起熟悉一下C++17和20标准的新特性）*
+*Become a proficient programmer by learning coding best practices with C++17 and C++20's latest features（各位程序员，来了解一下C++17和20标准的新特性）*
 
 * 作者：Vardan Grigoryan & Shunguang Wu
 * 译者：陈晓伟
@@ -11,54 +11,42 @@
 
 ## 本书主旨
 
-- Design professional-grade, maintainable apps by learning advanced concepts such as functional programming, templates, and networking
-- Apply design patterns and best practices to solve real-world problems
-- Improve the performance of your projects by designing concurrent data structures and algorithms
+- 通过学习函数式编程、模板和网络等高级概念，设计专业的、可维护的应用。
+- 应用设计模式和最佳实践来解决实际问题。
+- 通过设计并发数据结构和算法提升应用性能。
 
 ## 本书概述
 
-C++ has evolved over the years and the latest release – C++20 – is now available. Since C++11, C++ has been constantly enhancing the language feature set. With the new version, you’ll explore an array of features such as concepts, modules, ranges, and coroutines. This book will be your guide to learning the intricacies of the language, techniques, C++ tools, and the new features introduced in C++20, while also helping you apply these when building modern and resilient software.
+C++经过多年的发展，目前的最新标准为C++20。自C++11以来，C++语言不断的增强特性集。在新标准中，您将了解到一系列新特性，如概念、模块、范围和协程。这本书将作为学习错综复杂的语言、技术、C++工具和C++ 20新特性的指南，同时也会帮助你了解，在构建软件时如何应用他们。
 
-You’ll start by exploring the latest features of C++, and then move on to advanced techniques such as multithreading, concurrency, debugging, monitoring, and high-performance programming. The book will delve into object-oriented programming principles and the C++ Standard Template Library, and even show you how to create custom templates. After this, you’ll learn about different approaches such as test-driven development (TDD), behavior-driven development (BDD), and domain-driven design (DDD), before taking a look at the coding best practices and design patterns essential for building professional-grade applications. Toward the end of the book, you will gain useful insights into the recent C++ advancements in AI and machine learning.
+本书将从C++的最新特性开始，然后转向高级技术，如多线程、并发性、调试、监视和高性能编程。本书将深入探讨面向对象的编程原理和C++标准模板库，并展示如何创建自定义模板。之后，将学习不同的方法，比如测试驱动开发(TDD)、行为驱动开发(BDD)和领域驱动设计(DDD)，然后看看构建专业级应用程序所必需的编码最佳实践和设计模式。本书的最后，有关于人工智能和机器学习的C++最新进展的内容。
 
-By the end of this C++ programming book, you’ll have gained expertise in real-world application development, including the process of designing complex software.
+这本书的末尾，还有实际应用程序开发方面的专业知识，包括设计复杂软件的过程。
 
 ## 将会学到
 
-- Understand memory management and low-level programming in C++ to write secure and stable applications
-- Discover the latest C++20 features such as modules, concepts, ranges, and coroutines
-- Understand debugging and testing techniques and reduce issues in your programs
-- Design and implement GUI applications using Qt5
-- Use multithreading and concurrency to make your programs run faster
-- Develop high-end games by using the object-oriented capabilities of C++
-- Explore AI and machine learning concepts with C++
+- 了解内存管理和C++底层编程，编写安全稳定的应用程序。
+- 了解C++20的新特性，如模块、概念、范围和协程。
+- 熟悉调试和测试技术，减少程序中的问题。
+- 使用Qt5设计带GUI的程序。
+- 使用多线程和并发性可以使程序运行得更快。
+- 使用C++的面向对象的功能开发高端游戏。
+- 使用C++探索人工智能和机器学习。
 
 ## 目标读者
 
-This C++ book is for experienced C++ developers who are looking to take their knowledge to the next level and perfect their skills in building professional-grade applications.
+这本书是为有经验的C++开发人员准备的，能将他们现有的知识进行升级，并完善在构建专业级应用程序方面的技能。
 
 ## 作者简介
 
-**Vardan Grigoryan** is a senior backend engineer and C++ developer with more than 9 years of experience. Vardan started his career as a C++ developer and then moved to the world of server-side backend development. While being involved in designing scalable backend architectures, he always tries to incorporate the use of C++ in critical sections that require the fastest execution time. Vardan loves tackling computer systems and program structures on a deeper level. He believes that true excellence in programming can be achieved by means of a detailed analysis of existing solutions and by designing complex systems.
+**Vardan Grigoryan** 是一名高级后端工程师和C++开发者，拥有9年以上的开发经验。Vardan以C++开发人员的身份开始他的职业生涯，然后转到服务器端后端开发领域。在设计可伸缩的后端架构时，总是在耗时敏感的关键部分使用C++。Vardan喜欢在更深的层面上处理计算机系统和程序结构，通过对现有解决方案的详细分析和对复杂系统的精心设计，可以实现真正的卓越编程。
 
-**Shunguang Wu** is a senior professional staff at Johns Hopkins University Applied Physics Laboratory, and received his PhDs in theoretical physics and electrical engineering from Northwestern University (China) and Wright State University (USA), respectively. He published about 50 reviewed journal papers in the area of nonlinear dynamics, statistical signal processing and computer vision in his early career. His professional C++ experience started with teaching undergraduate courses in the late 1990s. Since then he has been designing and developing lots of R&D and end-user application software using C++ in world-class academic and industrial laboratories. These projects span both the Windows and Linux platforms.
+**Shunguang Wu** 是美国约翰霍普金斯大学应用物理实验室高级专业人员，分别在西北大学和美国莱特州立大学获得理论物理和电气工程博士学位。早期职业生涯中，在非线性动力学、统计信号处理和计算机视觉领域发表了大约50篇评论期刊论文。与C++的邂逅是在20世纪90年代末的本科教学中，从那时起，他就一直在学术和工业实验室使用C++设计和开发大量的研究和开发。这些项目都是跨平台项目，主要是Windows和Linux平台。
 
-About the reviewers
-Lou Mauget learned to program long ago at Michigan State University as a physics major,
-learning to use software in designing a cyclotron. Afterward, he worked for 34 years at
-IBM. He is currently consulting for Keyhole Software of Leawood, Kansas. Lou has coded
-in C++, Java, JavaScript, Python, and newer languages, as each was conceived. Current
-interests include reactive functional programming, containers, Node.js, NoSQL, geospatial
-systems, mobile, and any new language or framework. He has coauthored three computer
-books. He has written two IBM DeveloperWorks XML tutorials and co-written several J2EE
-certification tests for IBM. He has been a reviewer for Packt Publishing and others.
-Scott Hutchinson leads a team of C++ and F# developers in Oxnard, California. After a few
-years as a VB/VBA developer, he started developing with .NET Framework immediately
-after its launch in 2002. Since 2016, he has done most of his development in C++. He is a
-mentor for the F# track on Exercism, and teaches functional programming in F# to his team
-at work. His main professional interests are functional programming and machine learning.
-When he's not learning some new software development skill, he's usually hiking in the
-mountains of Southern California.
+## 书评人简介
+**Lou Mauget** 在密歇根州立大学(Michigan State University)主修物理时，使用软件设计了回旋加速器。之后，在IBM工作了34年，目前是堪萨斯州利伍德的Keyhole软件公司的顾问。Lou会使用C++、Java、JavaScript、Python和新语言进行了编程，几乎是个语言通。其目前的关注的领域有，响应式函数编程、容器、Node.js, NoSQL，地理空间系统，移动端，以及任何新的语言或框架。与其他人合著了三本计算机相关的书籍。他编写了两个IBM DeveloperWorks XML教程，并与其他人合作为IBM编写了几个J2EE认证测试。并且，他还是Packt Publishing等公司的书评人。
+
+**Scott Hutchinson** 在加州奥克斯纳德领导着一个C++和F#开发团队。做了几年VB/VBA开发人员之后，他在2002年开始使用.NET框架。2016年之后，他的大部分开发工作都用C++完成。他是[F# track on Exercism](https://github.com/exercism/fsharp)项目的导师，并在工作中作为团队教授F#函数式编程。他的主要关注函数式编程和机器学习。并且，他在假期时，会常在南加州的山区进行徒步旅行。
 
 ## 本书相关
 
