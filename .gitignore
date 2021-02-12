@@ -1,0 +1,6 @@
+*.toc
+/Expert-C++.synctex.gz
+*.pdf
+*.out
+*.log
+*.aux
