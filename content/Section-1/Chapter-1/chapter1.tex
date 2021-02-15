@@ -359,7 +359,327 @@ void log(const std::string& msg) {
 }
 \end{lstlisting}
 
-如果定义了DEBUG, log()函数将打印msg。如果你编译的项目启用了DEBUG(使用编译器标记，例如\texttt{g++}中的\texttt{-D})，那么log()函数将打印传递给它的字符串,否则什么不做。 \par
+如果定义了DEBUG, log()函数将打印msg。如果你编译的项目启用了DEBUG(使用编译器标记，例如\texttt{g++}中的\texttt{-D})，那么log()函数将打印传递给它的字符串，否则什么都不做。 \par
+
+\noindent\textbf{}\ \par
+\textbf{C++20中的模块}\ \par
+模块避免了头文件中恼人的包含保护问题，现在可以摆脱预处理宏。模块包含有两个相关的关键字，import和export。要使用一个模块，我们需要import。要声明带有导出属性的模块，我们使用export。在列出模块的好处前，先看一个简单的使用示例。下面的代码声明了一个模块: \par
+
+\begin{lstlisting}[caption={}]
+export module test;
+export int twice(int a) { return a * a; }
+\end{lstlisting}
+
+第一行声明了名为test的模块。接下，声明twice()函数，并将其设置为export。这意味着可以也有未导出的函数和其他实例，这些未导出的部分是模块私有的。通过导出，可以将其设置为模块的公共部分。要使用模块，可参照下面的代码: \par
+
+\begin{lstlisting}[caption={}]
+import test;
+int main()
+{
+	twice(21);
+}
+\end{lstlisting}
+
+模块是C++中一个期待已久的特性，它在编译和维护方面提供了更好的性能。以下特性使模块比常规头文件的表现得更好:\par
+
+\begin{itemize}
+	\item 一个模块只导入一次，类似于自定义语言实现所支持的预编译头文件。这大大减少了编译时间。未导出的元素对导入模块的单元没有影响。
+	\item 模块允许选择哪些单元导出，哪些不导出，从而表达代码的逻辑。模块可以绑定到更大的模块中。
+	\item 摆脱前面描述的包含安全之类的工作区。可以以任何顺序导入模块，不再需要考虑宏的重新定义。
+\end{itemize}
+
+\noindent\textbf{}\ \par
+模块可以与头文件一起使用。我们可以在同一个文件中导入和包含头文件，如下面的例子所示: \par
+
+\begin{lstlisting}[caption={}]
+import <iostream>;
+#include <vector>
+int main()
+{
+	std::vector<int> vec{1, 2, 3};
+	for (int elem : vec) std::cout << elem;
+}
+\end{lstlisting}
+
+创建模块时，可以自由地导出模块接口文件中的元素，并将实现移动到其他文件中。逻辑与管理的方式.h和.cpp文件相同。 \par
+
+\noindent\textbf{}\ \par
+\textbf{编译阶段}\ \par
+C++编译过程包括几个阶段。其中一些阶段用于分析源代码，其他阶段用于生成和优化目标机器代码。下面的图表显示了编译的阶段:\par
+
+\begin{center}
+	\includegraphics[width=0.3\textwidth]{content/Section-1/Chapter-1/2}
+\end{center}
+
+让我们详细地来了解每一个阶段。 \par
+
+\noindent\textbf{}\ \par
+\textbf{符号化}\ \par
+编译器的分析阶段旨在将源代码分割成可符号化的小单元。一个符号可以是一个单词，也可以只是一个操作符，比如=(等号)。符号是源代码中的原子单元，为编译器带来有意义的值，例如：表达式\texttt{int a = 42;}将被分为符号\texttt{int, a， =， 42，;}。表达式不用空格分隔，下面的表达式也会分割成相同的标记(但建议不要忘记操作数之间的空格): \par
+
+\begin{lstlisting}[caption={}]
+int a=42;
+\end{lstlisting}
+	
+使用正则表达式的复杂方法，将源码分割成符号的，这个过程称为“词法分析”，或“符号化”(分为符号)。对于编译器来说，使用符号化的输入，是构建用于分析代码语法的内部数据结构的更好方法。 \par
+	
+\noindent\textbf{}\ \par
+\textbf{语法分析}\ \par	
+当谈到编程语言的编译时，我们通常区分两个术语:语法和语义。语法是代码的结构，定义了符号组合结构的规则，例如：\texttt{day nice}在英语中是一个语法正确的短语，因为它的任何一个标记都不包含错误。另外，语义关注的是代码的实际意义，也就是说\texttt{day nice}在语义上是不正确的，应该改为\texttt{a nice day}。\par	
+语法分析是源码分析的关键部分，即使符号符合一般语法规则，也要对其进行语法和语义分析。以下代码为例: \par
+
+\begin{lstlisting}[caption={}]
+int b = a + 0;
+\end{lstlisting}	
+	
+这对我们来说可能没有意义，因为向变量添加0不会改变它的值，但编译器并不寻找逻辑意义——它寻找代码的语法正确性(缺少分号、缺少闭括号等)。编译的语法分析阶段检查代码的语法正确性。词法分析将代码分成符号，语法分析检查符号语法的正确性。如果我们遗漏了一个分号，上述表达式将产生语法错误: \par
+
+\begin{lstlisting}[caption={}]
+int b = a + 0
+\end{lstlisting}	
+	
+g++将会报出一个错误：\texttt{expected ';' at end of declaration}。 \par
+	
+\noindent\textbf{}\ \par
+\textbf{语义分析}\ \par	
+如果前面的表达式是这样的\texttt{b = a + 0;}时，编译器将把它分成标记为it、b、=和其他。我们知道有些是未知的，但对编译器来说，这是没问题的。不过，这将导致在g++中的编译错误\texttt{ unknown type name "it" }。寻找表达式背后的含义，才是语义分析(解析)的任务。 \par
+
+\noindent\textbf{}\ \par
+\textbf{生成中间码}\ \par	
+所有的分析完成后，编译器会生成中间码，这是一个阉割的C++，主要是由C语言构成。一个简单的例子如下: \par	
+
+\begin{lstlisting}[caption={}]
+class A {
+	public:
+	int get_member() { return mem_; }
+	private:
+	int mem_;
+};
+\end{lstlisting}	
+
+对代码进行分析之后，将生成中间码(这是一个抽象的例子，意在展示中间代码生成的思想，编译器可能在实现上有所不同):\par	
+
+\begin{lstlisting}[caption={}]
+struct A {
+	int mem_;
+};
+int A_get_member(A* this) { return this->mem_; }
+\end{lstlisting}
+
+\noindent\textbf{}\ \par
+\textbf{优化}\ \par	
+生成中间码有助于编译器在代码中进行优化，编译器可以优化代码。优化是在多次转换中完成的，例如下面的代码: \par
+
+\begin{lstlisting}[caption={}]
+int a = 41;
+int b = a + 1;
+\end{lstlisting}
+
+在编译过程中，将被优化为: \par
+
+\begin{lstlisting}[caption={}]
+int a = 41;
+int b = 41 + 1;
+\end{lstlisting}
+
+再次优化为: \par
+
+\begin{lstlisting}[caption={}]
+int a = 41;
+int b = 42;
+\end{lstlisting}
+
+一些程序中，如今的编译器比程序员代码写得更好。 \par
+
+\noindent\textbf{}\ \par
+\textbf{生成机器码}\ \par	
+编译器优化是在中间码和生成的机器码中完成的。当我们编译这个项目的时候是什么样子的呢？之前，当我们讨论源代码的预处理时，看了一个包含几个源文件的简单结构，包括两个头文件，rect.h和square.h，每个头文件都有它的.cpp文件，以及main.cpp包含程序入口点(main()函数)。预处理之后，下面的单元是编译器的输入为:main.cpp, rect.cpp和square.cpp，如下图所示: \par	
+
+\begin{center}
+	\includegraphics[width=0.3\textwidth]{content/Section-1/Chapter-1/3}
+\end{center}
+
+编译器将分别编译。编译单元，也称为源文件，在某种程度上彼此独立。当编译器编译在Rect中调用get\underline{ }area()函数的main.cpp时，不包含main.cpp中的get\underline{ }area()实现。相反，它只能确定该功能是在项目的某个地方实现的。当编译器到达rect.cpp时，编译器并不知道get\underline{ }area()函数在哪里使用。\par
+下面是编译器在main.cpp通过预处理阶段后得到的结果: \par
+
+\begin{lstlisting}[caption={}]
+// contents of the iostream
+struct Rect {
+	private:
+	double side1_;
+	double side2_;
+	public:
+	Rect(double s1, double s2);
+	const double get_area() const;
+};
+struct Square : Rect {
+	Square(double s);
+};
+int main() {
+	Rect r(3.1, 4.05);
+	std::cout << r.get_area() << std::endl;
+	return 0;
+}
+\end{lstlisting}
+
+分析main.cpp之后，编译器生成如下中间码(为了简单地表达编译的思想，省略了很多细节): \par
+
+\begin{lstlisting}[caption={}]
+struct Rect {
+	double side1_;
+	double side2_;
+};
+void _Rect_init_(Rect* this, double s1, double s2);
+double _Rect_get_area_(Rect* this);
+struct Square {
+	Rect _subobject_;
+};
+void _Square_init_(Square* this, double s);
+int main() {
+	Rect r;
+	_Rect_init_(&r, 3.1, 4.05);
+	printf("%d\n", _Rect_get_area(&r));
+	// we've intentionally replace cout with printf for brevity and
+	// supposing the compiler generates a C intermediate code
+	return 0;
+}
+\end{lstlisting}
+
+编译器在优化代码时将删除Square结构体，及其构造函数(我们将其命名为\underline{ }Square\underline{ }init\underline{ })，因为它从未在源代码中使用过。 \par
+此时，编译器只操作main.cpp，因此看到调用了\underline{ }Rect\underline{ }init\underline{ }和\underline{ }Rect\underline{ }get\underline{ }area\underline{ }函数的地方，但实现没有在同一个文件中提供。然而，由于事先提供了声明，所以编译器相信这些函数是在其他编译单元中实现的。基于这种信任和最小信息函数签名(其返回类型、名称和参数)的数量和类型，编译器生成一个对象文件，其中包含main.cpp工作代码。而后续的解析工作，是由链接器完成的。 \par
+下面的例子中，有生成的目标文件的简化版本，它包含两个部分——代码和信息。代码部分有每个指令的地址(十六进制值): \par
+
+\begin{lstlisting}[caption={}]
+code:
+0x00 main
+	0x01 Rect r;
+	0x02 _Rect_init_(&r, 3.1, 4.05);
+	0x03 printf("%d\n", _Rect_get_area(&r));
+information:
+	main: 0x00
+	_Rect_init_: ????
+	printf: ????
+	_Rect_get_area_: ????
+\end{lstlisting}
+
+先来看信息部分。编译器标记了代码部分中使用的所有函数，而这些函数在????的同一个编译单元中找不到。这些问号将被链接器在其他单元中找到的函数的实际地址所取代。main.cpp结束编译后，编译器开始编译rect.cpp文件: \par
+
+\begin{lstlisting}[caption={}]
+// file: rect.cpp
+struct Rect {
+	// #include "rect.h" replaced with the contents
+	// of the rect.h file in the preprocessing phase
+	// code omitted for brevity
+};
+Rect::Rect(double s1, double s2)
+: side1_(s1), side2_(s2)
+{}
+const double Rect::get_area() const {
+	return side1_ * side2_;
+}
+\end{lstlisting}
+
+按照同样的逻辑，编译这个单元会产生以下输出(仍然提供抽象的例子): \par
+
+\begin{lstlisting}[caption={}]
+code:
+	0x00 _Rect_init_
+	0x01 side1_ = s1
+	0x02 side2_ = s2
+	0x03 return
+	0x04 _Rect_get_area_
+	0x05 register = side1_
+	0x06 reg_multiply side2_
+	0x07 return
+information:
+	_Rect_init_: 0x00
+	_Rect_get_area_: 0x04
+\end{lstlisting}
+
+这个输出中包含了所有函数的地址，因此不需要等待稍后的解析。\par
+
+\noindent\textbf{}\ \par
+\textbf{平台和对象文件}\ \par
+我们刚才看到的抽象输出，与编译器在编译后产生的实际对象文件结构有些相似。对象文件的结构取决于平台，例如：在Linux中，它以ELF格式表示(ELF代表可执行和可链接格式)。平台是程序执行的环境，这里所说的平台是指计算机体系结构(更具体地说，是指令集体系结构)和操作系统的结合。硬件和操作系统是由不同的团队和公司设计和创建的。它们有不同的设计问题解决方案，这导致了平台之间的差异。平台在许多方面存在差异，这些差异也会投射到可执行文件的格式和结构上，例如：Windows系统中的可执行文件格式是可移植可执行文件(PE)，它与Linux中的ELF格式有不同的结构、编号和序列。 \par
+一个目标文件可以分为几个部分。最重要的是代码部分(.text)和数据部分(.data)。.text部分保存程序指令，.data部分保存指令使用的数据。数据本身可分割成几个部分，比如初始化的、未初始化的和只读数据。 \par
+除了.text和.data部分之外，对象文件的一个重要部分是符号表。符号表存储了字符串(符号)到目标文件中的位置的映射。前面的例子中，编译器生成的输出有两个部分，第二部分被标记为\texttt{information:}，它保存了代码中使用的函数名称和相对地址。\texttt{information:}是目标文件实际符号表的抽象版本，符号表包含代码中定义的符号和需要解析的代码中使用的符号。然后，链接器使用这些信息将目标文件链接在一起，形成最终的可执行文件。 \par
+
+\noindent\textbf{}\ \par
+\textbf{连接阶段}\ \par
+编译器为每个编译单元输出一个对象文件。在前面的示例中，我们有三个.cpp文件，编译器生成了三个目标文件。链接器的任务是将这些目标文件组合成一个单一的目标文件。合并文件会导致相对地址的改变，例如：如果链接器将rect.o文件放在main.o文件之后rect.o的起始地址变成0x04，而不是以前的值0x00:\par
+
+\begin{lstlisting}[caption={}]
+code:
+	0x00 main
+	0x01 Rect r;
+	0x02 _Rect_init_(&r, 3.1, 4.05);
+	0x03 printf("%d\n", _Rect_get_area(&r));
+	0x04 _Rect_init_
+	0x05 side1_ = s1
+	0x06 side2_ = s2
+	0x07 return
+	0x08 _Rect_get_area_
+	0x09 register = side1_
+	0x0A reg_multiply side2_
+	0x0B return
+information (symbol table):
+	main: 0x00
+	_Rect_init_: 0x04
+	printf: ????
+	_Rect_get_area_: 0x08
+	_Rect_init_: 0x04
+	_Rect_get_area_: 0x08
+\end{lstlisting}
+
+链接器相应地更新符号表地址(例子中的信息部分)。正如前面提到的，每个对象文件都有符号表，它将符号的字符串名称映射到文件中的相对位置(地址)。链接的下一步是解析目标文件中所有未解析的符号。\par
+现在连接器将main.o和rect.o合并，因为它们现在位于同一个文件中，就需要知道未解析符号的相对位置。printf符号将以同样的方式解析，只是这一次是把对象文件与标准库链接起来。在所有的目标文件组合在一起后(省略了方块的链接)，所有的地址都进行更新，所有的符号都可解析，链接器输出一个最终的目标文件，这个目标文件可以在操作系统中执行。正如本章前面所述，在可执行文件执行前，操作系统会使用加载器将可执行文件的内容加载到内存中。 \par
+
+\noindent\textbf{}\ \par
+\textbf{链接库}\ \par
+库类似于可执行文件，但有一个主要区别：没有main()函数，它不能作为常规程序调用。库用于组合多个程序中重用的代码，例如：通过包含<iostream>头文件将程序与标准库链接起来了。 \par
+库可以作为静态库或动态库与可执行文件链接。将它们链接为静态库时，将成为最终可执行文件的一部分。一个动态链接的库也由操作系统加载到内存中，以便为您的程序提供调用其函数的能力。假设我们想求平方根:\par
+
+\begin{lstlisting}[caption={}]
+int main() {
+	double result = sqrt(49.0);
+}
+\end{lstlisting}
+
+C++标准库提供了sqrt()函数，它返回参数的平方根。如果编译前面的示例，它将产生一个错误，提示sqrt函数没有声明。我们知道，要使用标准库函数，必须包含相应的<cmath>头文件。但是头文件不包含函数的实现，只是声明了函数(在std命名空间中)。我们先包含必要的头文件在源文件中: \par
+
+\begin{lstlisting}[caption={}]
+#include <cmath>
+int main() {
+	double result = std::sqrt(49.0);
+}
+\end{lstlisting}
+
+编译器将sqrt符号的地址标记为未知的，链接器应该在链接阶段解析它。如果源文件没有链接到标准库实现(包含库函数的目标文件)，连接器将无法解析这个问题。 \par
+如果链接是静态的，那么链接器生成的最终可执行文件将包含我们的程序和标准库。另一方面，如果链接是动态库，链接器会在运行时标记查找sqrt符号。 \par
+当我们运行程序时，加载器加载动态链接到程序的库。它也将标准库的内容加载到内存中，然后解析sqrt()函数在内存中的实际位置。已经加载到内存中的库，也可以供其他程序使用。 \par
+
+\noindent\textbf{}\ \par
+\textbf{总结}\ \par
+本章中，我们讨论了C++20的一些新特性，现在我们准备深入研究这门语言。我们讨论了构建C++应用程序的过程及其编译阶段。这包括分析代码，检测语法错误，生成中间代码以进行优化，最后生成目标文件，该目标文件将与其他生成的目标文件链接在一起，形成最终的可执行文件。 \par
+下一章中，我们将学习C++数据类型、数组和指针。还将了解指针是什么，并查看条件语句的底层细节。\par
+
+\noindent\textbf{}\ \par
+\textbf{问题}\ \par
+\begin{enumerate}
+	\item 编译器和解释器的区别是什么?
+	\item 列出程序编译阶段。
+	\item 预处理器做什么?
+	\item 链接器做了什么?
+	\item 链接静态库和动态库之间有什么区别?
+\end{enumerate}
+
+\noindent\textbf{}\ \par
+\textbf{延伸阅读}\ \par
+更多信息，请参阅高级C和C++编译网站： https:/​/​www.​amazon.​com/Advanced-​C-​Compiling-​Milan-​Stevanovic/​dp/​1430266678/​\par
+LLVM的信息, https://www.packtpub.com/application-development/llvm-essentials \par
+
+
+
 
 
 
