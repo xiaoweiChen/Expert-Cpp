@@ -1,0 +1,103 @@
+C++中内存管理是要付出代价的。开发者经常抱怨C++，因为需要手动进行内存管理。像C\#和Java这样的语言可以自动内存管理，但程序运行得要比C++程序慢，而手动内存管理通常容易出错且不安全。正如前几章已经看到的，程序代表数据和指令。几乎每个程序都在某种程度上使用计算机内存。很难想象一个程序不需要内存分配。 \par
+内存分配和回收从最简单的函数调用开始。调用函数通常意味着向它传递参数，函数需要空间来存储这些参数。为了让工作更轻松，这里可以自动处理。当代码中声明对象时，也会发生同样的自动分配，它们的生存期取决于作用域。只要超出了作用域，就会自动回收它们。大多数编程语言都为动态内存提供了类似的自动回收功能。动态分配内存——与自动分配相反——是程序员用来识别根据需要请求新内存的代码部分。例如，当客户数量增加时，将用于存储客户对新内存空间的请求列表到程序中。为了区分不同类型的内存管理，不管是自动的还是手动，开发者使用的都是内存分段。一个程序使用几个内存段、堆栈、堆、只读段等进行操作，尽管它们都具有相同的结构，并且都是虚拟内存的一部分。 \par
+大多数语言都提供了访问动态内存的简单方法，而不关心回收策略，将困难的工作留给运行时环境，C++开发者必须处理内存管理的底层细节。无论是由于哲学、结构还是语言的年代，C++都没有提供高级的内存管理功能。因此，对内存结构及其管理的深刻理解是每个C++开发者必须的。这一章中阐明内存背后的奥秘，以及正确的内存管理技术。 \par
+本章中，我们将了解以下内容: \par
+
+\begin{itemize}
+	\item 什么是内存，C++中我们如何访问它?
+	\item 详细的内存分配
+	\item 内存管理技术和习惯用法
+	\item 垃圾收集的基础
+\end{itemize}
+
+\noindent\textbf{}\ \par
+\textbf{编译器要求} \ \par
+g++编译器需要添加编译选项 \texttt{-std=c++2a} 来编译本章的代码。可以从这里获取本章的源码文件：https:/​/github.​com/PacktPublishing/Expert-CPP \par
+
+\noindent\textbf{}\ \par
+\textbf{理解计算机内存} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{内存存储的设计} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{从更高层次的角度理解计算机内存} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{寄存器} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{缓存} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{主存} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{固定存储器} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{内存管理的基础知识} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{内存管理的例子} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{使用智能指针} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{利用RAII} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{std::unique\underline{ }ptr} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{std::shared\underline{ }ptr和std::weak\underline{ }ptr} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{垃圾收集} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{使用分配器} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{总结} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{问题} \ \par
+\begin{enumerate}
+	\item 解释计算机内存。
+	\item 什么是虚拟内存?
+	\item 哪些是用于内存分配和回收的操作符?
+	\item delete和delete[]有什么区别?
+	\item 什么是垃圾收集器?为什么C++不支持垃圾收集?
+\end{enumerate}
+
+\noindent\textbf{}\ \par
+\textbf{扩展阅读} \ \par
+更多信息，请参阅以下链接: \par
+
+\begin{itemize}
+	\item What every programmer should know about memory, by Ulrich Drepper, at  https:/​/​people.​freebsd.​org/​~lstewart/​articles/​cpumemory.​pdf
+	\item Code: The hidden language of computer hardware and software, by Charles Petzold, at  https:/​/​www.​amazon.​com/​Code-​Language-​Computer-​Hardware-	Software/​dp/​0735611319/​
+\end{itemize}
+
+\newpage
+
+
+
