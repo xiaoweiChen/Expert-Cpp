@@ -1393,26 +1393,361 @@ int main()
 
 \noindent\textbf{}\ \par
 \textbf{利用特征优化算法} \ \par
+我们将使用一个优化复制的示例，来展示类型特征的用法，而不是通过的抽象方式来讨论这个主题。使用标准库中的copy算法: \par
+
+\begin{lstlisting}[caption={}]
+template<typename It1, typename It2>
+It2 copy(It1 first, It1 last, It2 out);
+\end{lstlisting}
+
+显然，可以为任何类型的迭代器编写copy()的泛型版本，即这里的It1和It2。然而，正如boost库作者所说的的那样，某些情况下，memcpy()可以执行复制操作。如果满足以下所有条件，就可以使用memcpy():\par
+
+\begin{itemize}
+	\item It1和It2这两种类型的迭代器都是指针。
+	\item 除了const和volatile限定符之外，It1和It2必须指向同一类型
+	\item 由It1所指向的类型必须提供一个简单的赋值操作符
+\end{itemize}
+
+赋值操作符意味着该类型要么是标量类型，要么是以下类型之一: \par
+
+\begin{itemize}
+	\item 该类型没有用户定义的赋值操作符
+	\item 该类型没有数据成员的引用类型
+	\item 赋值操作符必须在所有基类和数据成员对象中定义
+\end{itemize}
+
+标量类型包括算术类型、枚举类型、指针、成员指针或这些类型之一的const或volatile版本。 \par
+现在，让我们看看原始实现。它包括两个部分——复制器类模板和用户界面函数，即copy(): \par
+
+\begin{lstlisting}[caption={}]
+namespace detail{
+	//1. Declare primary class template with a static function template
+	template <bool b>
+	struct copier {
+		template<typename I1, typename I2>
+		static I2 do_copy(I1 first, I1 last, I2 out);
+	};
+	//2. Implementation of the static function template
+	template <bool b>
+	template<typename I1, typename I2>
+	I2 copier<b>::do_copy(I1 first, I1 last, I2 out) {
+		while(first != last) {
+			*out = *first;
+			++out;
+			++first;
+		}
+		return out;
+	};
+	//3. a full specialization of the primary function template
+	template <>
+	struct copier<true> {
+		template<typename I1, typename I2>
+		static I2* do_copy(I1* first, I1* last, I2* out){
+			memcpy(out, first, (last-first)*sizeof(I2));
+			return out+(last-first);
+		}
+	};
+} //end namespace detail
+\end{lstlisting}
+
+如注释行中所示，前面的复制器类模板有两个静态函数模板——一个是主函数模板，另一个是完全特化的。泛型类型的模板是逐个元素进行硬拷贝，而全特化对象通过memcpy()一次复制所有元素: \par
+
+\begin{lstlisting}[caption={}]
+//copy() user interface
+template<typename I1, typename I2>
+inline I2 copy(I1 first, I1 last, I2 out) {
+	typedef typename boost::remove_cv
+	<typename std::iterator_traits<I1>::value_type>::type v1_t;
+	typedef typename boost::remove_cv
+	<typename std::iterator_traits<I2>::value_type>::type v2_t;
+	enum{ can_opt = boost::is_same<v1_t, v2_t>::value
+		&& boost::is_pointer<I1>::value
+		&& boost::is_pointer<I2>::value
+		&& boost::has_trivial_assign<v1_t>::value
+	};
+	//if can_opt= true, using memcpy() to copy whole block by one
+	//call(optimized); otherwise, using assignment operator to
+	//do item-by-item copy
+	return detail::copier<can_opt>::do_copy(first, last, out);
+}
+\end{lstlisting}
+
+为了优化复制操作，前面的用户界面函数定义了两个remove\underline{ }cv模板对象:v1\underline{ }t和v2\underline{ }t，然后计算can\underline{ }opt是否为真。之后，调用do\underline{ }copy()模板函数。通过使用boost库(algo\underline{ }opt\underline{ }examples.cpp)中的测试代码，我们可以看到在使用优化的实现方面有了显著的改进，复制char或int类型的数据要快8到3倍。 \par
+最后，让我们总结一下: \par
+
+\begin{itemize}
+	\item 除了类型之外，特征还提供了其他信息，并通过模板特化实现的。
+	\item 按照惯例，特征总是作为结构来实现的。用于实现特征的结构称为特征类
+	\item Bjarne Stroustrup说，我们应该把特征看作一个小对象，它的主要目的是携带另一个对象或算法，从而确定策略或实现细节的信息。进一步阅读可参考[4]
+	\item Scott Meyers还总结说，我们应该使用特征类来收集信息，进一步阅读可参考[5]
+	\item 特征可以帮助我们以一种高效/优化的方式实现通用算法
+\end{itemize}
+
+接下来，我们将探索C++中的模板元编程。 \par
 
 \noindent\textbf{}\ \par
 \textbf{探索模板元编程} \ \par
+一种计算机程序能够把其他程序当作它们的数据来处理的编程技术，称为元编程。程序可以设计成读取、生成、分析或转换其他程序，甚至在运行时修改自己。元编程的一种是编译器，将文本格式程序作为输入语言(C、Fortran、Java等)，并以输生成另一种二进制机器码格式。\par
+C++模板元编程(TMP)是指在C++中使用模板生成元程序。其有两个条件——必须定义一个模板，以及必须实例化一个已定义的模板。TMP是图灵完备的，这意味着它有能力计算任何可计算的东西。另外，由于TMP中的变量都是不可变的(变量是常量)，所以使用递归，而不是迭代来处理集合中的元素。 \par
+为什么需要TMP？因为它可以加快我们的程序在执行时间!但由于在优化世界中没有免费的午餐，我们为TMP付出的代价不再是编译时和/或更大的二进制代码大小。另外，并不是所有的问题都可以用TMP解决，只有当我们计算的是编译时不变的东西时，才会起作用，例如：找出所有小于一个常数整数的所有数、一个常数整数的阶乘、展开一个常数数量的循环或迭代等。 \par
+从实用的角度来看，模板元编程能够解决以下三类问题:编译时计算、编译时优化，以及静态多态性。下面的小节中，我们将提供来自每个类别的示例，以演示元编程的工作原理。 \par
 
 \noindent\textbf{}\ \par
 \textbf{编译时计算} \ \par
+通常，如果任务的输入和输出在编译时是已知的，可以使用模板元编程在编译期间执行计算，从而节省运行时开销和内存占用。这在CPU利用率高的实时项目中非常有用。 \par
+我们看看阶乘函数，它计算n!。这是所有小于等于n的正整数与0的乘积!= 1的定义。由于递归的概念，可以使用一个简单的函数来实现它，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+//ch4_17_factorial_recursion.cpp
+#include <iostream>
+uint32_t f1(const uint32_t n) {
+	return (n<=1) ? 1 : n * f1(n - 1);
+}
+constexpr uint32_t f2(const uint32_t n) {
+	return ( n<=1 )? 1 : n * f2(n - 1);
+}
+int main() {
+	uint32_t a1 = f1(10); //run-time computation
+	uint32_t a2 = f2(10); //run-time computation
+	const uint32_t a3 = f2(10); //compile-time computation
+	std::cout << "a1=" << a1 << ", a2=" << a2 << std::endl;
+}
+\end{lstlisting}
+
+f1()在运行时执行计算，f2()可以在运行时或编译时执行，这取决于它的使用。 \par
+类似地，通过使用带有非类型形参、特化和递归概念的模板，这个问题的模板元编程版本如下:\par
+
+\begin{lstlisting}[caption={}]
+//ch4_18_factorial_metaprogramming.cpp
+#include <iostream>
+//define a primary template with non-type parameters
+template <uint32_t n>
+struct fact {
+	const static uint32_t value = n * fact<n - 1>::value;
+	//use next line if your compiler does not support declare and initialize
+	//a constant static int type member inside the class declaration
+	//enum { value = n * fact<n - 1>::value };
+};
+
+//fully specialized template for n as 0
+template <>
+struct fact<0> {
+	const static uint32_t value = 1;
+	//enum { value = 1 };
+};
+using namespace std;
+int main() {
+	cout << "fact<0>=" << fact<0>::value << endl; //fact<0>=1
+	cout << "fact<10>=" << fact<10>::value << endl; //fact<10>=3628800
+	//Lab: uncomments the following two lines, build and run
+	// this program, what are you expecting?
+	//uint32_t m=5;
+	//std::cout << fact<m>::value << std::endl;
+}
+\end{lstlisting}
+
+创建了一个带有非类型形参的类模板，并且像其他const表达式一样，const static uint32\underline{ }t或枚举常量的值在编译时计算。这个编译时求值约束意味着只有const变量才有意义。另外，因为我们只使用类，所以静态对象是有意义的。 \par
+当编译器看到模板的新参数时，会创建该模板的新实例。例如，当编译器看到fact<10>::value并试图创建一个实参为10的fact实例时，结果是fact<9>也必须创建。对于fact<9>，它需要fact<8>，以此类推。最后，编译器使用fact<0>::value(即1)，并且在编译期间递归终止。这个过程可以在下面的代码块中看到:\par
+
+\begin{lstlisting}[caption={}]
+fact<10>::value = 10* fact<9>::value;
+fact<10>::value = 10* 9 * fact<8>::value;
+fact<10>::value = 10* 9 * 8 * fact<7>::value;
+.
+.
+.
+fact<10>::value = 10* 9 * 8 *7*6*5*4*3*2*fact<1>::value;
+fact<10>::value = 10* 9 * 8 *7*6*5*4*3*2*1*fact<0>::value;
+...
+fact<10>::value = 10* 9 * 8 *7*6*5*4*3*2*1*1;
+\end{lstlisting}
+
+注意，为了能够以这种方式使用模板，必须在模板实参列表中提供一个常量实参。这就是为什么如果取消对最后两行代码的注释，编译器就会提示: \par
+
+\begin{lstlisting}[caption={}]
+fact:template parameter n: m: a variable
+with non-static storage duration cannot be used as a non-type argument  \end{lstlisting}
+
+最后，我们通过简单比较conexpr函数(CF)和TMP来结束本小节: \par
+
+\begin{itemize}
+	\item \textbf{计算时间:}CF在编译时或运行时执行，这取决于它的使用，但TMP只在编译时执行。
+	\item \textbf{参数列表:}CF只能接受值，但是TMP可以同时接受值和类型参数。
+	\item \textbf{控制结构:}CF可以使用递归、条件和循环，但是TMP只使用递归。
+\end{itemize}
 
 \noindent\textbf{}\ \par
 \textbf{编译时优化} \ \par
+虽然前面的示例可以在编译时计算常数整数的阶乘，但可以使用运行时循环展开两个-n向量的点积(其中n在编译时是已知的)，传统的长度-n向量的好处是展开循环是可行的。 \par
+以传统的点积函数模板为例，可以采用以下方式实现: \par
+
+\begin{lstlisting}[caption={}]
+//ch4_19_loop_unoolling_traditional.cpp
+#include <iostream>
+using namespace std;
+template<typename T>
+T dotp(int n, const T* a, const T* b)
+{
+	T ret = 0;
+	for (int i = 0; i < n; ++i) {
+		ret += a[i] * b[i];
+	}
+	return ret;
+}
+int main()
+{
+	float a[5] = { 1, 2, 3, 4, 5 };
+	float b[5] = { 6, 7, 8, 9, 10 };
+	cout<<"dot_product(5,a,b)=" << dotp<float>(5, a, b) << '\n'; //130
+	cout<<"dot_product(5,a,a)=" << dotp<float>(5, a, a) << '\n'; //55
+}
+\end{lstlisting}
+
+循环展开意味着，如果我们可以优化dotp()函数内部的for循环为[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3] + a[4]*b[4]，将节省更多的运行时计算。这正是元编程在下面的代码块中所做的:\par
+
+\begin{lstlisting}[caption={}]
+//ch4_20_loop_unroolling_metaprogramming.cpp
+#include <iostream>
+//primary template declaration
+template <int N, typename T>
+class dotp {
+	public:
+	static T result(T* a, T* b) {
+		return (*a) * (*b) + dotp<N - 1, T>::result(a + 1, b + 1);
+	}
+};
+//partial specialization for end condition
+template <typename T>
+class dotp<1, T> {
+	public:
+	static T result(T* a, T* b) {
+		return (*a) * (*b);
+	}
+};
+int main()
+{
+	float a[5] = { 1, 2, 3, 4, 5 };
+	float b[5] = { 6, 7, 8, 9, 10 };
+	std::cout << "dot_product(5,a,b) = "
+	<< dotp<5, float>::result( a, b) << '\n'; //130
+	std::cout << "dot_product(5,a,a) = "
+	<< dotp<5,float>::result( a, a) << '\n'; //55
+}
+\end{lstlisting}
+
+与阶乘元编程示例类似，在\texttt{dotp<5, float>::result(a, b)}中，实例化进程递归地执行以下计算: \par
+
+\begin{lstlisting}[caption={}]
+dotp<5, float>::result( a, b)
+= *a * *b + dotp<4,float>::result(a+1,b+1)
+= *a * *b + *(a+1) * *(b+1) + dotp<3,float>::result(a+2,b+2)
+= *a * *b + *(a+1) * *(b+1) + *(a+2) * *(b+2)
+	+ dotp<2,float>::result(a+3,b+3)
+= *a * *b + *(a+1) * *(b+1) + *(a+2) * *(b+2) + *(a+3) * *(b+3)
+	+ dotp<1,float>::result(a+4,b+4)
+= *a * *b + *(a+1) * *(b+1) + *(a+2) * *(b+2) + *(a+3) * *(b+3)
+	+ *(a+4) * *(b+4)
+\end{lstlisting}
+
+当N是5，就会递归地调用\texttt{dotp< N, float>::results()}模板函数四次，直到\texttt{dotp<1, float>::results()}。代码块的最后两行，是由\texttt{dotp<5, float>::result(a, b)}计算的最终表达式。 \par
 
 \noindent\textbf{}\ \par
 \textbf{静态多态性} \ \par
+多态意味着多个函数具有相同的名称。动态多态性允许用户决定在运行时执行实际的函数方法，而静态多态性意味着，实际的函数在编译时是已知的。默认情况下，C++在编译时通过检查函数类型和/或实参数量来匹配函数调用和正确的函数定义。这个过程称为静态绑定或重载。但是，通过使用虚函数，编译器也在运行时进行动态绑定或覆盖。 \par
+例如，下面的代码中，基类B和派生类D中都定义了一个虚函数alg()。我们使用派生对象指针p作为基类的实例指针时，p->alg()函数调用将调用派生类中定义的派生alg(): \par
+
+\begin{lstlisting}[caption={}]
+//ch4_21_polymorphism_traditional.cpp
+#include <iostream>
+class B{
+	public:
+	B() = default;
+	virtual void alg() {
+		std::cout << "alg() in B";
+	}
+};
+class D : public B{
+	public:
+	D() = default;
+	virtual void alg(){
+		std::cout << "alg() in D";
+	}
+};
+int main()
+{
+	//derived object pointer p as an instance pointer of the base class
+	B *p = new D();
+	p->alg(); //outputs "alg() in D"
+	delete p;
+	return 0;
+}
+\end{lstlisting}
+
+但多态性行为是不变的，并且可以在编译时确定的情况下，使用奇怪重复的模板模式(CRTP)来实现静态多态性，模仿静态多态性并在编译时解析绑定。这样，程序就不用在运行时检查虚拟查找表了。下面的代码以静态多态性的方式实现了前面的例子: \par
+
+\begin{lstlisting}[caption={}]
+//ch4_22_polymorphism_metaprogramming.cpp
+#include <iostream>
+template <class D> struct B {
+	void ui() {
+		static_cast<D*>(this)->alg();
+	}
+};
+struct D : B<D> {
+	void alg() {
+		cout << "D::alg()" << endl;
+	}
+};
+int main(){
+	B<D> b;
+	b.ui();
+	return 0;
+}	
+\end{lstlisting}
+
+总之，模板元编程的一般思想是让编译器在编译时做一些计算。通过这种方式，可以在一定程度上解析运行时开销。之所以能在编译期间计算一些东西，是因为有些东西在运行前是常量。 \par
+如[14]中提到的，C++TMP是在编译时执行计算任务的一种非常强大的方法。第一种方法必须非常小心地处理编译错误，因为模板树是展开的。从实用的角度来看，boost元编程库(MPL)是一个很好的入门参考，以通用的方式为算法、序列和元函数提供了编译时TMP框架。此外，C++17中新的std::variant和std::visit特性，可以用于没有相关类型共享继承类型接口的静态多态性。 \par
 
 \noindent\textbf{}\ \par
 \textbf{总结} \ \par
+本章中，讨论了C++中泛型编程相关的主题。从回顾C宏和函数重载开始，介绍了C++模板开发的动机。然后，给出了带有固定数量参数的类和函数模板的语法，以及特化和实例化。自C++11以来，可变参数模板被标准泛型函数模板和类模板所接受。在此基础上，进一步将模板形参和实参分为三类:非类型模板形参/实参、类型模板形参/实参和模板模板形参/实参。 \par
+还了解了特征和模板元编程。作为模板特化的副产品，特征类可以为提供更多关于类型的信息。在类型信息的帮助下，最终让实现泛型算法的优化成为可能。类和/或函数模板的另一个应用是在编译时通过递归计算一些常量任务，称为模板元编程。有能力执行编译时计算和/或优化，以及避免在运行时查找虚拟表。 \par
+现在，应该对模板有了深刻的理解。应该能够在应用程序中创建自己的函数和类模板，并实践使用特征来优化算法，并使用模板元编程来执行编译时计算，以获得额外的优化。 \par
+下一章中，我们将了解与内存和管理相关的主题，例如：内存访问的概念、内存分配和回收技术，以及垃圾收集基础知识。这是C++的特性，因此每个C++开发者都必须理解它。 \par
 
 \noindent\textbf{}\ \par
 \textbf{问题} \ \par
+\begin{enumerate}
+	\item 宏的副作用是什么?
+	\item 什么是类/函数模板?什么是模板类/函数?
+	\item 什么是模板参数列表?什么是模板参数列表?一旦有了类模板，就可以显式或隐式地实例化它。在什么样的场景中需要显式实例化?
+	\item 多态性在C++中意味着什么?函数重载和函数重写之间的区别是什么?
+	\item 什么是类型特征?我们如何实现类型特征?
+	\item 在ch4\underline{ }5\underline{ }class\underline{ }template\underline{ }implicit\underline{ }inst\underline{ }B.cpp文件中，我们讨论过隐式实例化生成X<int>类，然后创建xi对象并生成X<int>::f()函数，而不是X<int>::g()。如何验证X<int>::g()没有生成?
+	\item 使用模板元编程，求解$f(x,n) = x^n$的问题，其中n是7。const和x是变量。
+	\item 将ch4\underline{ }17\underline{ }loop\underline{ }unrolling\underline{ }metaprogramming.cpp扩展为8。$n = 10100 10 ^ 3 10 ^ 4、10 ^ 6、…$直到达到系统内存限制为止。比较编译时间、对象文件大小和CPU运行时间。
+\end{enumerate}
 
 \noindent\textbf{}\ \par
 \textbf{扩展阅读} \ \par
+
+\begin{itemize}
+	\item Milner, R., Morris, L., Newey, M. (1975). A Logic for Computable Functions with Reflexive and Polymorphic Types. Proceedings of the Conference on Proving and Improving Programs.	https:/​/​www.​research.​ed.​ac.​uk/​portal/​en/​publications/​a-​logic-​for-	computable-​functions-​with-​reflexive-​and-​polymorphic-​types(9a69331e-b562-​4061-​8882-​2a89a3c473bb).​html
+	\item Curtis, Dorothy (2009-11-06). CLU home page.Programming Methodology Group, Computer Science and Artificial Intelligence Laboratory. Massachusetts Institute	of Technology.	http:/​/​www.​pmg.​csail.​mit.​edu/​CLU.​html
+	\item Technical Corrigendum for Ada 2012, published by ISO. Ada Resource Association. 2016-01-29.	https://www.adaic.org/2016/01/technical-corrigendum-for-ada-2012-published-by-iso/
+	\item B. Stroustrup, C++. https:/​/​dl.​acm.​org/​doi/​10.​5555/​1074100.​1074189
+	\item S. Meyers, Effective C++ 55 Specific Ways to Improve Your Programs and Designs (3rd Edition), Chapter 7.	https:/​/​www.​oreilly.​com/​library/​view/​effective-​c-​55/​0321334876/​
+	\item D. Gregor and J. Järvi (February 2008). Variadic Templates for C++0x. Journal of Object Technology. pp. 31–51	http:/​/​www.​jot.​fm/​issues/​issue\underline{ }​2008\underline{ }​02/​article2.​pdf
+	\item https:/​/​www.​boost.​org/​ for type traits, unit testing etc.
+	\item https:/​/​www.​ibm.​com/​support/​knowledgecenter/​ssw\underline{ }​ibm\underline{ }​i\underline{ }​72/​rzarg/templates.​htm for generic templates discussions.
+	\item https:/​/​stackoverflow.​com/​questions/​546669/​c-​code-​analysis-​tool for code analysis tools.
+	\item https:/​/​en.​cppreference.​com for template explicit instantiations.
+	\item http:/​/​www.​cplusplus.​com for library references and usage examples.
+	\item http:/​/​www.​drdobbs.​com/​cpp/​c-​type-​traits/​184404270 for type-traits.
+	\item https:/​/​accu.​org/​index.​php/​journals/​424 for template metaprogramming.
+	\item https:/​/​en.​wikipedia.​org/​wiki/​Template\underline{ }​metaprogramming for template metaprogramming.
+	\item K. Czarnecki, U. W. Eisenecker, Generative Programming: Methods, Tools, and	Applications, Chapter 10.
+	\item N. Josuttis; D. Gregor and D. Vandevoorde, C++ Templates: The Complete Guide (2nd Edition), Addison-Wesley Professional 2017.
+\end{itemize}
 
 \newpage
