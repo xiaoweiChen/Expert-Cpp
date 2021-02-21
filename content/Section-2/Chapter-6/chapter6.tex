@@ -378,18 +378,387 @@ int main()
 
 \noindent\textbf{}\ \par
 \textbf{STL容器} \ \par
+STL是一个强大的算法和容器集合。虽然理解和实现数据结构对程序员来说是一项很好的技能，但不必在项目中每次都去实现它们。标准库库提供商负责为我们实现稳定的、经过测试的数据结构和算法。通过了解数据结构和算法的细节，在解决问题时更好地选择STL容器和算法。 \par
+前面讨论的vector和链表在STL中实现为std::vector<T>和std::list<T>，其中T是容器中每个元素的类型。除了类型之外，容器还接受分配器作为第二个默认模板参数。例如，std::vector的声明如下: \par
+
+\begin{lstlisting}[caption={}]
+template <typename T, typename Allocator = std::allocator<T> >
+class vector;
+\end{lstlisting}
+
+正如前一章所介绍的，分配器处理容器元素的分配/回收。std::allocator是STL中所有标准容器的默认分配器。一个更复杂的基于内存资源行为不同的分配器是std::pmr::polymorphic\underline{ }allocator。STL提供了std::pmr::vector作为使用多态分配器的别名模板，定义如下: \par
+
+\begin{lstlisting}[caption={}]
+namespace pmr {
+	template <typename T>
+	using vector = std::vector<T, std::pmr::polymorphic_allocator<T>>;
+}
+\end{lstlisting}
+
+现在让我们仔细了解std::vector和std::list。  \par
 
 \noindent\textbf{}\ \par
 \textbf{使用std::vector和std::list} \ \par
+std::vector定义在<vector>头文件中。下面是最简单的用法示例: \par
+
+\begin{lstlisting}[caption={}]
+#include <vector>
+
+int main()
+{
+	std::vector<int> vec;
+	vec.push_back(4);
+	vec.push_back(2);
+	for (const auto& elem : vec) {
+		std::cout << elem;
+	}
+}
+\end{lstlisting}
+
+vector是动态增长的，应该考虑增长因素。声明vector时，有默认的容量，然后在插入元素时增长。每当元素的数量超过vector的容量时，vector就将容量增加一个给定的因子(通常是将容量翻倍)的量。如果我们知道vector中需要的元素的大致数量，可以通过使用reserve()方法首先为vector分配容量来优化它的使用。例如，下面的代码保留了10,000个元素的容量: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<int> vec;
+vec.reserve(10000);
+\end{lstlisting}
+
+它强制vector为10,000个元素分配空间，从而避免在元素插入期间调整大小(除非达到10,000个元素的阈值)。 \par
+另一方面，如果遇到容量远远大于vector中实际元素数量的情况，则可以收缩vector以释放未使用的内存。我们需要调用shrink\underline{ }to\underline{ }fit()函数，如下面的示例所示: \par
+
+\begin{lstlisting}[caption={}]
+vec.shrink_to_fit();
+\end{lstlisting}
+
+访问vector元素的方法与访问普通数组的方法相同，使用操作符[]。但是，std::vector提供了两个访问其元素的选项。其中一种方法认为是安全的，通过at()函数完成，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+std::cout << vec.at(2);
+// is the same as
+std::cout << vec[2];
+// which is the same as
+std::cout << vec.data()[2];
+\end{lstlisting}
+
+at()和操作符[]的区别在于，at()访问指定元素时进行边界检查，下面一行抛出了一个std::out\underline{ }of\underline{ }range异常: \par
+
+\begin{lstlisting}[caption={}]
+try {
+	vec.at(999999);
+} catch (std::out_of_range& e) { }
+\end{lstlisting}
+
+我们几乎以同样的方式使用std::list。这些列表大多具有类似的公共接口。本章后面，我们将讨论允许从特定容器中抽象的迭代器，这样就可以用vector替换list，而不会有太多损失。在此之前，让我们看看list和vector的公共接口的区别。 \par
+除了这两个容器都支持的标准函数集，如size()、resize()、empty()、clear()、erase()等，列表还有push\underline{ }front()函数，用于在列表的前插入一个元素。因为std::list表示一个双向链表。如下代码所示，std::list也支持push\underline{ }back(): \par
+
+\begin{lstlisting}[caption={}]
+std::list<double> lst;
+lst.push_back(4.2);
+lst.push_front(3.14);
+// the list contains: "3.14 -> 4.2"
+\end{lstlisting}
+
+列表的添加操作，在许多情况下会派上用场。例如，要合并两个排序列表，我们使用merge()方法。它接受另一个列表作为参数，并将其所有元素移动到当前列表中。作为参数传递给merge()方法的列表在操作之后变为空。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/tip}
+STL还提供了一个单链表，用std::forward\underline{ }list表示。要使用它，你应该包含<forward\underline{ }list>头文件。由于单链表节点只有一个指针，因此在内存方面它比双链表更节省。 \par
+\noindent\textbf{}\ \par
+
+splice()方法类似于merge()，不同的是它移动作为参数提供的一部分，通过移动将内部指针重新指向合适的列表节点。merge()和splice()都是如此。 \par
+当我们使用容器存储和操作复杂对象时，复制元素的代价在程序的性能中扮演着重要的角色。考虑下面一个三维点的结构体: \par
+
+\begin{lstlisting}[caption={}]
+struct Point
+{
+	float x;
+	float y;
+	float z;
+	Point(float px, float py, float pz)
+	: x(px), y(py), z(pz)
+	{}
+	Point(Point&& p)
+	: x(p.x), y(p.y), z(p.z)
+	{}
+};
+\end{lstlisting}
+
+现在，看看下面的代码，它将一个Point对象插入到vector中: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<Point> points;
+points.push_back(Point(1.1, 2.2, 3.3));
+\end{lstlisting}
+
+构造一个临时对象，然后移动到向量对应的槽中。我们可以直观地表示为: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-6/15}
+\end{center}
+
+很明显，vector会提前占用更多的空间，从而尽可能长地延迟调整操作。当插入新元素时，vector会将其复制到下一个可用的槽位(如果槽位已满，则会重新分配更多空间)。我们可以使用未初始化的空间在适当位置创建新元素。为此，vector提供了emplace\underline{ }back()函数。下面是我们如何使用它: \par
+
+\begin{lstlisting}[caption={}]
+points.emplace_back(1.1, 2.2, 3.3);
+\end{lstlisting}
+
+请注意这里直接传递给函数的参数。下图描述了emplace\underline{ }back()的用法: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-6/16}
+\end{center}
+
+emplace\underline{ }back()通过std::allocator\underline{ }traits::construct()构造元素。后者通常使用new操作符在已经分配的未初始化空间中构造元素。 \par
+std::list还提供了一个emplace\underline{ }front()方法。这两个函数都返回对插入元素的引用。唯一的要求是元素的类型必须是EmplaceConstructible。对于vector，类型也应该是MoveInsertable。 \par
 
 \noindent\textbf{}\ \par
 \textbf{使用容器适配器} \ \par
+作为开发者可能遇到过将堆栈和队列描述为数据结构(或者用C++来表示容器)的情况。从技术上讲，它们不是数据结构，而是数据结构适配器。STL中，std::stack和std::queue通过提供访问容器的特殊接口来适配容器。堆栈这个词几乎无处不在，到目前为止，我们已经使用它来描述具有自动存储时间对象的内存段。由于分配/回收策略，这段内存称为堆栈。 \par
+我们说对象在每次声明时都会入栈，在销毁时出栈。对象的弹出顺序与它们推入顺序相反。这就是将内存段调用堆栈的原因，同样的后进先出(LIFO)方法也适用于堆栈适配器。std::stack提供的关键功能如下: \par
+
+\begin{lstlisting}[caption={}]
+void push(const value_type& value);
+void push(value_type&& value);
+\end{lstlisting}
+
+push()函数有效地调用了底层容器的push\underline{ }back()。通常，堆栈是使用vector来实现的。在介绍受保护的继承时，我们已经在第3章中讨论过这样的场景。stack有两个模板形参，其中一个是容器。选择什么并不重要，但它必须有push\underline{ }back()成员函数。std::stack和std::queue的默认容器是std::deque。\par
+std::deque允许在开头和结尾快速插入，是一个类似于std::vector的索引顺序容器。名称deque表示双端队列。 \par
+让我们看看堆栈的行为: \par
+
+\begin{lstlisting}[caption={}]
+#include <stack>
+
+int main()
+{
+	std::stack<int> st;
+	st.push(1); // stack contains: 1
+	st.push(2); // stack contains: 2 1
+	st.push(3); // stack contains: 3 2 1
+}
+\end{lstlisting}
+
+替代push()函数更好的方法是emplace()。因此，调用底层容器的emplace\underline{ }back()，在适当的位置构造元素。 \par
+为了取出元素，我们调用pop()函数。它不接受任何参数，也不返回任何东西，它只是从堆栈中删除顶部元素。要访问堆栈的顶部元素，需要调用top()函数。修改前面的例子，在弹出堆栈元素之前打印所有的堆栈元素: \par
+
+\begin{lstlisting}[caption={}]
+#include <stack>
+int main()
+{
+	std::stack<int> st;
+	st.push(1);
+	st.push(2);
+	st.push(3);
+	std::cout << st.top(); // prints 3
+	st.pop();
+	std::cout << st.top(); // prints 2
+	st.pop();
+	std::cout << st.top(); // prints 1
+	st.pop();
+	std::cout << st.top(); // crashes application
+}
+\end{lstlisting}
+
+函数的作用:返回对顶部元素的引用，调用底层容器的back()函数。请注意在空堆栈上调用的最后一个top()函数。我们建议在对空堆栈调用top()之前，使用size()检查堆栈的大小。 \par
+queue是另一个适配器，与栈的行为略有不同。队列背后的逻辑是，它首先返回第一个插入的元素:先进先出(FIFO)原则。请看下面的图表: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-6/17}
+\end{center}
+
+队列中插入和检索操作的正式名称是enqueue和dequeue。queue保持数据一致性的方法，并提供push()和pop()函数。要访问队列的第一个和最后一个元素，应该使用front()和back()，两者都返回对元素的引用。下面是一个简单的用法示例: \par
+
+\begin{lstlisting}[caption={}]
+#include <queue>
+int main()
+{
+	std::queue<char> q;
+	q.push('a');
+	q.push('b');
+	q.push('c');
+	std::cout << q.front(); // prints 'a'
+	std::cout << q.back(); // prints 'c'
+	q.pop();
+	std::cout << q.front(); // prints 'b'
+}
+\end{lstlisting}
+
+要正确使用各种容器和适配器时，了解它们是很有必要的。在为各种问题选择合适的容器方面，并没有什么灵丹妙药。许多编译器使用堆栈来解析代码表达式，例如：很容易使用栈，验证下面表达式中的圆括号: \par
+
+\begin{lstlisting}[caption={}]
+int r = (a + b) + (((x * y) - (a / b)) / 4);
+\end{lstlisting}
+
+试着练习一下。编写一个小程序，使用堆栈验证前面的表达式。 \par
+排队的应用范围甚至更广。我们将在第11章中看到其中的一个例子。 \par
+另一个容器适配器是std::priority\underline{ }queue。优先队列通常采用均衡的、基于节点的数据结构，比如:大堆或小堆。我们将在本章的末尾研究树和图，以及了解优先队列是如何工作的。 \par
 
 \noindent\textbf{}\ \par
 \textbf{迭代容器} \ \par
+不可迭代的容器就像不能驾驶的汽车。毕竟，容器是项的集合，循环遍历容器元素的一种常用方法是使用普通的for循环: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<int> vec{1, 2, 3, 4, 5};
+for (int ix = 0; ix < vec.size(); ++ix) {
+	std::cout << vec[ix];
+}
+\end{lstlisting}
+
+容器为元素访问提供了一组不同的操作。例如，vector提供操作符[]，而list没有。std::list有front()和back()方法，它们分别返回第一个和最后一个元素。如前所述，std::vector还提供了at()和运算符[]。 \par
+这意味着不能使用前面的循环来迭代列表元素。但可以使用基于范围的for循环遍历列表(和vector)，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+std::list<double> lst{1.1, 2.2, 3.3, 4.2};
+for (auto& elem : lst) {
+	std::cout << elem;
+}
+\end{lstlisting}
+
+看起来可能令人困惑，这个技巧隐藏在基于范围的实现中。它使用std::begin()函数检索指向容器第一个元素的迭代器。 \par 
+迭代器是指向容器元素的对象，可以根据容器的物理结构推进到下一个元素。下面的代码声明了一个vector迭代器，并使用指向vector开头的迭代器对其进行初始化: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<int> vec{1, 2, 3, 4};
+std::vector<int>::iterator it{vec.begin()};
+\end{lstlisting}
+
+容器提供了两个成员函数begin()和end()，分别返回指向容器开头和结尾的迭代器。下面的图表显示了如何处理容器的开头和结尾: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-6/18}
+\end{center}
+
+前面使用基于范围的for遍历列表元素的代码，可以认为类似于以下代码: \par
+
+\begin{lstlisting}[caption={}]
+auto it_begin = std::begin(lst);
+auto it_end = std::end(lst);
+for ( ; it_begin != it_end; ++it_begin) {
+	std::cout << *it_begin;
+}
+\end{lstlisting}
+
+请注意前面代码中使用的*操作符，该操作符通过迭代器访问底层元素。我们认为迭代器是指向容器元素的指针。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/tip}
+std::begin()和std::end()函数通常分别调用容器的begin()和end()方法。然而，它们也适用于常规数组。 \par
+\noindent\textbf{}\ \par
+
+容器迭代器清楚地知道如何使用容器元素，例如：向前移动vector迭代器将其移动到数组的下一个槽位，而向前移动list迭代器则使用相应的指针将其移动到下一个节点，如下面的代码所示: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<int> vec;
+vec.push_back(4);
+vec.push_back(2);
+std::vector<int>::iterator it = vec.begin();
+std::cout << *it; // 4
+it++;
+std::cout << *it; // 2
+
+std::list<int> lst;
+lst.push_back(4);
+lst.push_back(2);
+std::list<int>::iterator lit = lst.begin();
+std::cout << *lit; // 4
+lit++;
+std::cout << *lit; // 2
+\end{lstlisting}
+
+每个容器都有自己的迭代器实现，这就是为什么list迭代器和vector迭代器有相同的接口，但行为不同。迭代器的行为由它的类别定义，例如：vector的迭代器是随机访问迭代器，可以使用该迭代器随机访问任何元素。下面的代码通过vector的迭代器向vector的第4个元素添加3，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+auto it = vec.begin();
+std::cout << *(it + 3);
+\end{lstlisting}
+
+STL中有六种类型的迭代器: \par
+
+\begin{itemize}
+	\item 输入
+	\item 输出(与输入相同，但支持写访问)
+	\item 向前
+	\item 双向
+	\item 随机访问
+	\item 连续性
+\end{itemize}
+
+输入迭代器提供读访问(通过调用*操作符)，并允许使用前缀和后缀自增操作符转发迭代器位置。输入迭代器不支持多次传递，只能使用迭代器在容器上迭代一次。另一方面，前向迭代器支持多次传递，支持多次遍历可以通过迭代器多次读取元素的值。 \par
+输出迭代器不提供对元素的访问，但它允许给元素赋新值。具有多重传递特性的输入迭代器和输出迭代器的组合构成了前向迭代器。然而，前向迭代器只支持自增操作，而双向迭代器支持将迭代器移动到任何位置。它们都支持递减操作，例如：std::list支持双向迭代器。 \par
+最后，随机访问迭代器允许通过在迭代器上加/减一个数字来跳转元素。迭代器将跳转到算术操作指定的位置。vector提供了随机访问迭代器。 \par
+每个类别都定义了一组可应用于迭代器的操作，例如：可以使用输入迭代器读取元素的值，并通过递增迭代器前进到下一个元素。另一方面，随机访问迭代器允许迭代器对任意值递增或递减，读取和写入元素的值等。 \par
+本节描述的所有特性的组合都属于连续迭代器类别，它也期望容器是连续的。这意味着容器元素需要紧挨着另一个元素。连续容器的例子是std::array。 \par
+像distance()这样的函数使用迭代器的信息来实现最快的执行结果。例如，两个双向迭代器之间的distance()函数的执行时间是线性的，而用于随机访问迭代器相同函数的执行时间是常量。 \par
+下面的伪代码演示了一个示例实现: \par
+
+\begin{lstlisting}[caption={}]
+template <typename Iter>
+std::size_type distance(Iter first, Iter second) {
+	if (Iter is a random_access_iterator) {
+		return second - first;
+	}
+	std::size_type count = 0;
+	for ( ; first != last; ++count, first++) {}
+	return count;
+}
+\end{lstlisting}
+
+尽管前面示例中显示的伪代码工作良好，但我们应该考虑在运行时检查迭代器的类别不是一个选项。它是在编译时定义的，因此需要使用模板特化来为随机访问迭代器生成distance()函数。更好的解决方案是使用std::is\underline{ }same类型特征，定义在<type\underline{ }traits>中: \par
+
+\begin{lstlisting}[caption={}]
+#include <iterator>
+#include <type_traits>
+
+template <typename Iter>
+typename std::iterator_traits<Iter>::difference_type distance(Iter first,
+Iter last)
+{
+	using category = std::iterator_traits<Iter>::iterator_category;
+	if constexpr (std::is_same_v<category, std::random_access_iterator_tag>)
+	{
+		return last - first;
+	}
+	typename std::iterator_traits<Iter>::difference_type count;
+	for (; first != last; ++count, first++) {}
+	return count;
+}
+\end{lstlisting}
+
+std::is\underline{ }same\underline{ }v是std::is\underline{ }same的助手模板，定义如下: \par
+
+\begin{lstlisting}[caption={}]
+template <class T, class U>
+inline constexpr bool is_same_v = is_same<T, U>::value;
+\end{lstlisting}
+
+迭代器最重要的特性是，减少了容器和算法之间的耦合: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-6/19}
+\end{center}
+
+STL基于这三个概念:容器、算法和迭代器。虽然vector、list或任何其他容器不同，但它们都有相同的目的:存储数据。 \par
+另一方面，算法是处理数据的函数，大部分时间都在收集数据。算法定义通常表示一种通用的方式，指定应该采取的步骤来处理容器元素。例如，排序算法按升序或降序对容器元素进行排序。 \par
+vector是连续容器，而list是基于节点的容器。对它们进行排序需要对特定容器的物理结构有更深入的了解。要正确地对向量进行排序，应该为它实现一个单独的排序函数。 \par
+迭代器将这种实现的多样性带到通用级别。它们为库设计人员提供了实现一个排序函数的能力，该函数将只处理迭代器，从容器类型中抽象出来。STL中使用sort()算法(在<algorithm>中定义)处理迭代器，我们可以用同一个函数对向量和列表进行排序: \par
+
+\begin{lstlisting}[caption={}]
+#include <algorithm>
+#include <vector>
+#include <list>
+...
+std::vector<int> vec;
+// insert elements into the vector
+std::list<int> lst;
+// insert elements into the list
+
+std::sort(vec.begin(), vec.end());
+std::sort(lst.begin(), lst.end());
+\end{lstlisting}
+
+本节中描述的迭代器现在认为是之前版本遗留特性，C++20引入了一种新的基于概念的迭代器。 \par
 
 \noindent\textbf{}\ \par
 \textbf{概念和迭代器} \ \par
+C++20的主要特性之一是引入概念。除了概念之外，C++20还提供了基于概念的新迭代器。虽然本章讨论的迭代器现在认为是遗留特性，但已经用它们编写了许多代码。这就是我们在继续讨论新的迭代器概念之前.首先介绍它们的原因。现在，让我们来看看，什么是概念，以及如何使用。 \par
 
 \noindent\textbf{}\ \par
 \textbf{理解概念} \ \par
