@@ -278,27 +278,425 @@ int main()
 
 \noindent\textbf{}\ \par
 \textbf{纯函数} \ \par
+如果一个函数对其他变量的状态没有影响，那么它就是纯函数。与非纯函数相比，纯函数的性能较差，因为它们避免了由于状态修改而在代码中出现的大多数bug。程序使用数据，因此使用状态修改功能，为最终用户带来一些预期的结果。 \par
+在面向对象编程中，我们将程序分解为对象，每一个对象都有一系列特殊的特性。OOP中对象的基本特性之一是它的状态。通过向对象发送消息(换句话说，调用其方法)来修改对象的状态，在OOP中是至关重要的。通常，成员函数调用会导致对象状态的修改。函数式编程中，我们将代码组织成纯函数的集合，每个函数都有自己的目的，并且独立于其他函数。 \par
+我们看一个简单的例子，只是为了使这个概念更清楚。假设我们在一个程序中处理User对象，每个User对象都包含与User相关的信息。User类在下面的代码块中声明为一个结构体: \par
+
+\begin{lstlisting}[caption={}]
+struct User
+{
+	int age;
+	string name;
+	string phone_number;
+	string email;
+};
+\end{lstlisting}
+
+需要每年更新用户的年龄，假设我们有一个每年为每个User对象调用一次的函数。下面的函数接受一个User对象作为输入，并将其年龄增加1: \par
+
+\begin{lstlisting}[caption={}]
+void update_age(User& u)
+{
+	u.age = u.age + 1;
+}
+\end{lstlisting}
+
+update\underline{ }age()函数通过引用接受输入，并更新原始对象。但在函数式编程中却不是这样。下面的纯函数不是通过引用来获取原始对象，并改变其值，而是返回一个具有相同属性的user对象，只是更新了age属性: \par
+
+\begin{lstlisting}[caption={}]
+User pure_update_age(const User& u) // cannot modify the input argument
+{
+	User tmp{u};
+	tmp.age = tmp.age + 1;
+	return tmp;
+}
+\end{lstlisting}
+
+尽管与update\underline{ }age()相比，看起来效率较低，但这种方法的优点是使操作变得非常清晰(这在调试代码时非常有用)，可以保证pure\underline{ }update\underline{ }age()不会修改原始对象。我们可以修改前面的代码，使它按值接受对象。这样，我们将跳过tmp对象的创建，因为实参本身表示为一个副本: \par
+
+\begin{lstlisting}[caption={}]
+User pure_update_age(User u) // u is the copy of the passed object
+{
+	u.age = u.age + 1;
+	return u;
+}
+\end{lstlisting}
+
+如果用相同的参数多次调用纯函数，则每次都必须返回相同的结果。下面的代码演示了pure\underline{ }update\underline{ }age()函数在给定相同的输入时，返回相同的值: \par
+
+\begin{lstlisting}[caption={}]
+User john{.age{21}, .name{"John"}};
+
+auto updated{pure_update_age(john)};
+std::cout << updated.age; // prints 22
+
+updated = pure_update_age(john);
+std::cout << updated.age; // prints 22
+\end{lstlisting}
+
+对于函数来说，每次为相同的输入数据调用它时，都可以以相同的方式运行。这意味着可以通过将应用程序分解成更小的函数，来设计应用程序的逻辑，每个函数都有明确的目的。然而，就额外的临时对象而言，纯函数有开销。常规的设计包括有一个集中存储程序状态的存储，由纯函数间接更新。每次使用纯函数后，该函数将修改后的对象作为新对象返回，必要时可以存储该对象。可以将其视为调整代码，以忽略传递的对象。 \par
 
 \noindent\textbf{}\ \par
 \textbf{高阶函数} \ \par
+函数式编程中，函数是一等对象。我们应该把函数当作对象，而不是一组指令。这对我们有什么区别?此时，要将一个函数视为对象，体现的是将它传递给其他函数的能力。接受其他函数作为参数的函数称为高阶函数。 \par
+C++开发者将一个函数传递给另一个函数并不少见。下面是一些经典的方法: \par
+
+\begin{lstlisting}[caption={}]
+typedef void (*PF)(int);
+void foo(int arg)
+{
+	// do something with arg
+}
+
+int bar(int arg, PF f)
+{
+	f(arg);
+	return arg;
+}
+
+bar(42, foo);
+\end{lstlisting}
+
+代码中，声明了一个指向函数的指针。PF表示函数的类型定义，接受一个整型参数，不返回任何值。示例是将指针函数作为参数，传递给其他函数的一种方法。我们把函数看作为一个对象，这需要我们对对象更深的理解。 \par
+前面的章节中，我们将对象定义为具有状态的东西。如果将函数视为对象，我们也应该能够在需要时以某种方式改变其状态。对于函数指针，情况并非如此。下面是传递一个函数给另一个函数的更好方法: \par
+
+\begin{lstlisting}[caption={}]
+class Function
+{
+public:
+	void modify_state(int a) {
+		state_ = a;
+	}
+	int get_state() {
+		return state_;
+	}
+	void operator()() {
+		// do something that a function would do
+	}
+private:
+	int state_;
+};
+void foo(Function f)
+{
+	f();
+	// some other useful code
+}
+\end{lstlisting}
+
+声明了一个具有重载函数操作符的类。每当重载类的操作符时，就使其可调用。听起来很明显，任何可调用都视为函数。因此，具有重载函数操作符的类对象可以视为函数(也称为函子)。这在某种程度上更像是一个技巧，因为我们没有把函数变成对象，而是把对象变成了可调用的函数。然而，这让我们能够实现我们所寻找的:一个具有状态的函数。下面的客户端代码演示了函数对象有一个状态: \par
+
+\begin{lstlisting}[caption={}]
+void foo(Function f)
+{
+	f();
+	f.modify_state(11);
+	cout << f.get_state(); // get the state
+	f(); // call the "function"
+}
+\end{lstlisting}
+
+通过这样做，我们可以跟踪函数被调用了多少次。下面是一个跟踪调用数量的简单示例: \par
+
+\begin{lstlisting}[caption={}]
+class Function
+{
+public:
+	void operator()() {
+		// some useful stuff
+		++called_;
+	}
+private:
+	int called_ = 0;
+};
+\end{lstlisting}
+
+最后，在<functional>头文件中定义的std::function演示了另一种定义高阶函数的方法: \par
+
+\begin{lstlisting}[caption={}]
+#include <functional>
+
+void print_it(int a) {
+	cout << a;
+}
+std::function<void(int)> function_object = print_it;
+\end{lstlisting}
+
+当调用function\underline{ }object时(使用())，它将调用委托给print\underline{ }it函数。function封装了函数，并允许将其作为对象使用(并将其传递给其他函数)。 \par
+例子中以其他函数作为参数的函数，都是高阶函数的例子。返回函数的函数也称为高阶函数。总而言之，高阶函数是接受或返回另一个或多个函数的函数。看看下面的例子: \par
+
+\begin{lstlisting}[caption={}]
+#include <functional>
+#include <iostream>
+
+std::function<int (int, int)> get_multiplier()
+{
+	return [](int a, int b) { return a * b; };
+}
+
+int main()
+{
+	auto multiply = get_multiplier();
+	std::cout << multiply(3, 5) << std::endl; // outputs 15
+}
+\end{lstlisting}
+
+get\underline{ }multiplier()返回一个用std::function包装的lambda函数。然后调用，就像调用一个常规函数一样。get\underline{ }multiplier()函数是一个高阶函数。我们可以使用高阶函数实现套用。函数式编程中，套用就是将一个函数带几个参数放入几个函数中，每个函数带一个参数，例如：将multiply(3,5)变为multiply(3)(5)。我们可以这样做: \par
+
+\begin{lstlisting}[caption={}]
+std::function<int(int)> multiply(int a)
+{
+	return [a](int b) { return a * b; };
+}
+
+int main()
+{
+	std::cout << multiply(3)(5) << std::endl;
+}
+\end{lstlisting}
+
+multiply()只接受一个参数，返回的函数也只有一个参数。请注意lambda捕获:它捕获a的值，以便在它的体中将其乘以b。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/warn}
+Curry指的是逻辑学家Haskell Curry。Haskell、Brook和Curry编程语言也以他的名字命名。 \par
+\noindent\textbf{}\ \par
+
+套用的一个最有用的特性是，可以将抽象函数组合在一起。我们可以创建multiply()的特化版本，并将其传递给其他函数，或者在任何合适的地方使用。这可以在下面的代码中看到: \par
+
+\begin{lstlisting}[caption={}]
+auto multiplyBy22 = multiply(22);
+auto fiveTimes = multiply(5);
+
+std::cout << multiplyBy22(10); // outputs 220
+std::cout << fiveTimes(4); // outputs 20
+\end{lstlisting}
+
+使用STL时，一定使用了高阶函数。许多STL算法使用谓词来过滤或处理对象集合，例如：std::find\underline{ }if函数查找满足传递的谓词对象的元素，如下面的示例所示: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<int> elems{1, 2, 3, 4, 5, 6};
+std::find_if(elems.begin(), elems.end(), [](int el) {return el % 3 == 0;});
+\end{lstlisting}
+
+std::find\underline{ }if将lambda作为其谓词，并对vector中的所有元素使用它。满足条件的元素将作为请求的元素返回。 \par
+另一个高阶函数的例子是std::transform，我们在本章开始时介绍过(不要与ranges::view::transform混淆)。让我们用它把一个字符串转换成大写字母: \par
+
+\begin{lstlisting}[caption={}]
+std::string str = "lowercase";
+std::transform(str.begin(), str.end(), str.begin(),
+	[](unsigned char c) { return std::toupper(c); });
+std::cout << str; // "LOWERCASE"
+\end{lstlisting}
+
+第三个形参是容器的开头，也是std::transform函数插入其当前结果的地方。 \par
 
 \noindent\textbf{}\ \par
 \textbf{折叠表达式} \ \par
+折叠(或简化)是将一组值组合在一起以生成较少结果的过程。大多数时候，我们谈论的是单一的结果。折叠抽象了递归的结构上迭代的过程。例如，就元素访问而言，list或vector具有递归性质。虽然vector的递归性质具有争议，但我们将其视为递归，因为它允许我们通过重复递增索引来访问其元素。为了处理这样的结构，我们通常会跟踪每一步的结果，然后处理下一个项目，以便稍后与前一个结果结合。根据我们处理集合元素的方向，折叠称为左折叠或右折叠。 \par
+例如，std::accumulate函数(另一个高阶函数的例子)是折叠功能的完美例子，因为它组合了集合中的值。看看下面这个简单的例子: \par
+
+\begin{lstlisting}[caption={}]
+std::vector<double> elems{1.1, 2.2, 3.3, 4.4, 5.5};
+auto sum = std::accumulate(elems.begin(), elems.end(), 0);
+\end{lstlisting}
+
+函数的最后一个参数是累加器。这个初始值应该用作集合第一个元素的前一个值。上面的代码计算vector元素的和。这是std::accumulate函数的默认行为。正如我们前面提到的，它是一个高阶函数，这意味着函数可以作为它的参数传递。然后对每个元素调用这个函数，以产生所需的结果，例如：找到前面声明的elems向量的乘积: \par
+
+\begin{lstlisting}[caption={}]
+auto product = std::accumulate(elems.begin(), elems.end(), 1, [](int prev, int cur) { return prev * cur; });
+\end{lstlisting}
+
+需要一个有两个参数的函数，第一个参数是计算的前一个值，第二个参数是当前值。操作的结果将是下一个步骤的前一个值。代码可以用STL中的操作，以简洁的方式重写: \par
+
+\begin{lstlisting}[caption={}]
+auto product = std::accumulate(elems.begin(), elems.end(), 1, std::multiplies<int>());
+\end{lstlisting}
+
+std::accumulate函数的更好替代是std::reduce函数。reduce()类似于accumulate()，不同的是它不保持操作的顺序，它不必按顺序处理集合元素。可以将执行策略传递给std::reduce函数，并更改其行为，比如：并行处理元素。下面是如何使用并行执行策略，将reduce函数应用于前面例子中的elems: \par
+
+\begin{lstlisting}[caption={}]
+std::reduce(std::execution::par, elems.begin(), elems.end(),
+1, std::multiplies<int>());
+\end{lstlisting}
+
+虽然std::reduce看起来比std::accumulate快，但是在使用非交换二元操作时应该小心。 \par
+折叠和递归密不可分。递归函数也通过将问题分解成更小的任务，逐个解决来解决整个问题。 \par
 
 \noindent\textbf{}\ \par
 \textbf{深入地研究递归} \ \par
+第2章中讨论了递归函数的主要特性。来看看以下递归计算一个数字的阶乘的简单例子: \par
+
+\begin{lstlisting}[caption={}]
+int factorial(int n)
+{
+	if (n <= 1) return 1;
+	return n * factorial(n - 1);
+}
+\end{lstlisting}
+
+与迭代函数相比，递归函数提供了优雅的解决方案。但是，应该谨慎地决定是否使用递归。递归函数最常见的问题之一是堆栈溢出。 \par
 
 \noindent\textbf{}\ \par
 \textbf{头递归} \ \par
+头递归是我们熟悉的常规递归方式。前面的例子中，factorial函数的行为就是一个头递归函数，它在处理当前步骤的结果之前进行递归调用。看一下阶乘函数的下面一行: \par
+
+\begin{lstlisting}[caption={}]
+...
+return n * factorial(n - 1);
+...
+\end{lstlisting}
+
+为了找到并返回乘积的结果，调用factorial函数，并带有一个简化的参数，即(n-1)。这意味着乘积(*操作符)在某种程度上处于暂停状态，正在等待它的第二个参数通过阶乘(n-1)返回。堆栈的增长与递归调用函数的次数一致，让我们试着比较一下递归阶乘的实现和下面的迭代方法: \par
+
+\begin{lstlisting}[caption={}]
+int factorial(int n)
+{
+	int result = 1;
+	for (int ix = n; ix > 1; --ix) {
+		result *= ix;
+	}
+	return result;
+}
+\end{lstlisting}
+
+这里的主要区别是，在每一步都将product的结果存储在同一个变量(名为result)中。让我们尝试分解阶乘函数的递归实现。 \par
+很明显，每个函数调用都会占用堆栈上指定的空间。每个步骤的每个结果都应该存储在堆栈的某个地方。虽然我们知道它应该是同一个变量，但递归函数并不关心，它会为变量分配空间。常规递归函数要求我们找到一种解决方案，即知道每个递归调用的结果应该存储在相同的地方。 \par
 
 \noindent\textbf{}\ \par
 \textbf{尾递归} \ \par
+尾递归是解决递归函数中存在多个不必要变量问题的方法。尾递归函数的基本思想是在递归调用之前进行实际处理。下面是我们如何将阶乘函数转换为尾递归函数: \par
+
+\begin{lstlisting}[caption={}]
+int tail_factorial(int n, int result)
+{
+	if (n <= 1) return result;
+	return tail_factorial(n - 1, n * result);
+}
+\end{lstlisting}
+
+注意函数的新参数。仔细阅读前面的代码，我们可以了解正在发生的尾递归的基本概念:处理在递归调用之前完成在tail\underline{ }factorial函数再次调用之前，计算当前的结果(n * result)并传递给它。 \par
+虽然这种想法看起来并不吸引人，但如果编译器支持尾部调用优化(TCO)，它就会非常高效。TCO基本上涉及到阶乘函数(尾部)的第二个参数可以在每次递归调用时存储在相同的位置。这允许堆栈保持相同的大小，独立于递归调用的数量。 \par
+说到编译器优化，我们不能忽略模板元编程。我们在这里与编译器优化一起提到它，可以将元编程视为对程序的最大优化。编译时进行计算总是比在运行时进行计算更好。 \par
 
 \noindent\textbf{}\ \par
 \textbf{C++中(函数式)的元编程} \ \par
+元编程可以看作是另一种编程范式，是一种完全不同的编码方法，因为不是在处理常规的编程过程。所谓常规过程，我们指的是程序在其生命周期中所经历的三个阶段:编码、编译和运行。很明显，一个程序在执行时做了它应该做的事情，可执行文件由编译器通过编译和链接生成。另一方面，元编程是代码编译期间执行代码的地方。如果你是第一次面对它，这听起来可能很神奇。如果程序还不存在，我们怎么执行代码?回顾第4章中关于模板的内容，我们知道编译器处理模板需要多次传递。第一次传递中，编译器定义模板类或函数中使用的必要类型和形参。接下来，编译器开始用我们熟悉的方式编译，它生成一些代码，这些代码将被链接器链接，以生成最终的可执行文件。 \par
+由于元编程是在代码编译过程中发生，我们应该知道使用了哪些语言概念和结构。任何可以在编译时计算的东西都可以用作元编程构造，比如：模板。 \par
+下面是用C++进行元编程的经典例子: \par
+
+\begin{lstlisting}[caption={}]
+template <int N>
+struct MetaFactorial
+{
+	enum {
+		value = N * MetaFactorial<N - 1>::value
+	};
+};
+
+template <>
+struct MetaFactorial<0>
+{
+	enum {
+		value = 1
+	};
+};
+
+int main() {
+	std::cout << MetaFactorial<5>::value; // outputs 120
+	std::cout << MetaFactorial<6>::value; // outputs 720
+}
+\end{lstlisting}
+
+我们在上一节用不到5行代码编写了阶乘，为什么要为阶乘写这么多代码呢?原因在于它的效率。虽然编译代码需要花费更多的时间，但与普通的阶乘函数(递归或迭代实现)相比，是高效的。这种效率背后的原因是，实际的阶乘计算是在编译时进行的，当可执行文件运行时，结果已经可以使用了。我们只是在运行程序时使用了计算值，运行时不进行计算。如果是第一次看到这段代码，下面的解释会让您爱上元编程。 \par
+让我们详细分解和分析前面的代码。首先，元阶乘模板是用带有value属性的单个enum声明的。选择此enum仅仅是因为它的属性是在编译时计算的。因此，当我们访问MetaFactorial的value属性时，它已经在编译时计算(评估)了。看看枚举的实际值。它从相同的元阶乘类中建立递归依赖: \par
+
+\begin{lstlisting}[caption={}]
+template <int N>
+struct MetaFactorial
+{
+	enum {
+		value = N * MetaFactorial<N - 1>::value
+	};
+};
+\end{lstlisting}
+
+聪明的你可能已经注意到了这个技巧。MetaFactorial<N - 1>和MetaFactorial<N>不是同一个结构。尽管具有相同的名称，但是具有不同类型或值的每个模板都将作为单独的新类型生成。所以，我们调用类似这样的东西: \par
+
+\begin{lstlisting}[caption={}]
+std::cout << MetaFactorial<3>::value;
+\end{lstlisting}
+
+编译器会为每个值生成三个不同的结构体(下面是一些表示我们应该如何描绘编译器工作的伪代码): \par
+
+\begin{lstlisting}[caption={}]
+struct MetaFactorial<3>
+{
+	enum {
+		value = 3 * MetaFactorial<2>::value
+	};
+};
+
+struct MetaFactorial<2>
+{
+	enum {
+		value = 2 * MetaFactorial<1>::value;
+	};
+};
+
+struct MetaFactorial<1>
+{
+	enum {
+		value = 1 * MetaFactorial<0>::value;
+	};
+};
+\end{lstlisting}
+
+下一段代码中，编译器将生成的每个结构体的值替换为各自的数值，如下面的伪代码所示: \par
+
+\begin{lstlisting}[caption={}]
+struct MetaFactorial<3>
+{
+	enum {
+		value = 3 * 2
+	};
+};
+
+struct MetaFactorial<2>
+{
+	enum {
+		value = 2 * 1
+	};
+};
+
+struct MetaFactorial<1>
+{
+	enum {
+		value = 1 * 1
+	};
+};
+\end{lstlisting}
+
+然后，编译器删除未使用的生成的结构，只留下MetaFactorial<3>，如同MetaFactorial<3>::value一样。这也可以进行优化。这样做，我们可以得到如下结果: \par
+
+\begin{lstlisting}[caption={}]
+std::cout << 6;
+\end{lstlisting}
+
+将这一行与前面的行进行比较: \par
+
+\begin{lstlisting}[caption={}]
+std::cout << MetaFactorial<3>::value;
+\end{lstlisting}
+
+这就是元编程的美妙之处——在编译时完成，不会留下任何痕迹，就像忍者一样。与常规解决方案相比，编译需要更长的时间，但程序的执行速度是最快的。我们建议读者们尝试实现其他代价昂贵的计算的元版本，例如：计算第n个斐波那契数。这并不像为运行时编写代码那么简单，但是现在读者们已经对它的强大功能有了一定的了解。\par
 
 \noindent\textbf{}\ \par
 \textbf{总结} \ \par
+本章中，我们有了一个新视角。作为一种多范式语言，C++可以用作函数式编程语言。 \par
+我们学习了函数式编程的主要原理，如：纯函数、高阶函数和折叠表达式。纯函数不会改变状态的函数。纯函数的优点是，避免由于状态突变而引入的bug。 \par
+高阶函数是接受或返回其他函数的函数。与函数式编程不同，C++开发者在处理STL时使用高阶函数。 \par
+纯函数，以及高阶函数，允许我们将整个应用程序分解成一个大的函数装配线。这个装配线中的每个函数负责接收数据并返回原始数据的新修改版本(不改变原始状态)。当这些功能组合在一起时，提供了一个协调良好的任务组。 \par
+下一章中，我们将深入研究多线程编程，并讨论C++中的线程库组件。 \par
 
 \noindent\textbf{}\ \par
 \textbf{问题} \ \par
