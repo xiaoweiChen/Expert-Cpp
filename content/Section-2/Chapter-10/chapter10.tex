@@ -165,61 +165,729 @@ class User
 如下所示的交互图，将描述用户购买产品时所做的交易等操作: \par
 
 \begin{center}
-	\includegraphics[width=0.6\textwidth]{content/Section-2/Chapter-10/3}
+	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-10/3}
 \end{center}
 
 测试计划也可以认为是设计的一部分，包括如何测试最终应用程序的计划，例如：在此之前的步骤包括一个地址的概念，地址可以包含国家、城市等。正确的测试应该包括，检查是否可以在用户地址中成功设置国家。虽然测试计划通常不认为是开发者的任务，但对项目来说，它是一种很好的实践。在设计项目时，适当的测试计划将产生更多有用的信息。大多数输入数据处理和安全检查都在测试计划中发现，例如：在进行需求分析或编写功能规范时，对用户名或电子邮件地址设置严格的限制可能并不适用。测试计划会关注这样的场景，并迫使开发人员进行数据检查。然而，大多数开发人员并没有耐心做这些，而是直接进入项目开发的下一个步骤——编码。 \par
 
 \noindent\textbf{}\ \par
 \textbf{编码} \ \par
+如前所述，编码并不是项目开发的唯一。编码之前，应该通过规范中的需求来仔细设计项目。在完成前面的项目开发步骤后，编码将变得容易和高效。 \par
+一些团队实践测试驱动开发(TDD)，这是产生更稳定项目的好方法。TDD的主要概念是在项目实现之前编写测试。这是程序员定义项目需求和回答开发过程中出现的进一步问题的好方法。 \par
+假设我们正在为User类实现setter。user对象包含电子邮件字段，所以应该也有一个set\underline{ }email()方法，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+class User
+{
+public:
+	// code omitted for brevity
+	void set_email(const std::string&);
+private:
+	// code omitted for brevity
+	std::string email_;
+};
+\end{lstlisting}
+
+TDD方法建议在实现set\underline{ }email()之前，为set\underline{ }email()方法编写一个测试函数。测试函数如下所示: \par
+
+\begin{lstlisting}[caption={}]
+void test_set_email()
+{
+	std::string valid_email = "valid@email.com";
+	std::string invalid_email = "112%$";
+	User u;
+	u.set_email(valid_email);
+	u.set_email(invalid_email);
+}
+\end{lstlisting}
+
+前面的代码中，我们声明了两个字符串变量，其中一个包含无效的电子邮件地址值。在运行测试函数之前，我们就知道在无效数据输入的情况下，set\underline{ }email()方法应该以某种方式做出反应。常见的方法是抛出一个提示无效输入的异常。可以忽略set\underline{ }email实现中的无效输入，并返回一个布尔值，指示操作的成功。错误处理应该在项目中保持一致，并得到所有团队成员的同意。考虑一下抛出异常，测试函数在处理无效值时应该期待异常。 \par
+上面的代码应该重写，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+void test_set_email()
+{
+	std::string valid_email = "valid@email.com";
+	std::string invalid_email = "112%$";
+	
+	User u;
+	u.set_email(valid_email);
+	if (u.get_email() == valid_email) {
+		std::cout << "Success: valid email has been set successfully" <<
+		std::endl;
+	} else {
+		std::cout << "Fail: valid email has not been set" << std::endl;
+	}
+
+	try {
+		u.set_email(invalid_email);
+		std::cerr << "Fail: invalid email has not been rejected" << std::endl;
+	} catch (std::exception& e) {
+		std::cout << "Success: invalid email rejected" << std::endl;
+	}
+}
+\end{lstlisting}
+
+测试功能似乎已经完成。无论何时运行测试函数，都会输出set\underline{ }email()的当前状态。即使我们还没有实现set\underline{ }email()函数，相应的测试函数也是实现细节的一大步。现在有了函数实现，所以了解了如何对有效和无效的数据输入作出反应。我们可以添加更多类型的数据，以确保set\underline{ }email()方法在实现完成时进行彻底的测试。例如，可以用空字符串和长字符串来测试它。 \par
+下面是set\underline{ }email()方法的初始实现: \par
+
+\begin{lstlisting}[caption={}]
+#include <regex>
+#include <stdexcept>
+
+void User::set_email(const std::string& email)
+{
+	if (!std::regex_match(email,
+	std::regex("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+")) {
+		throw std::invalid_argument("Invalid email");
+	}
+
+	this->email_ = email;
+}
+\end{lstlisting}
+
+初始实现之后，我们应该再次运行我们的测试函数，以确保实现与定义的测试用例一致。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/tip}
+为项目编写测试被认为是一种良好的编码实践。有不同类型的测试，比如:单元测试、回归测试、冒烟测试等。开发人员应该支持他们项目的单元测试覆盖率。 \par
+\noindent\textbf{}\ \par
+
+编码过程是项目开发生命周期中最混乱的步骤之一。很难估计实现一个类或它的方法需要多长时间，因为大多数问题和困难都出现在编码过程中。本章开头所描述的项目开发生命周期的前面步骤，往往涵盖了这些问题中的大部分，并简化了编码过程。 \par
 
 \noindent\textbf{}\ \par
 \textbf{测试和稳定性} \ \par
+项目完成后，应该对其进行适当的测试。通常，软件开发公司有质量保证(QA)工程师，他们会一丝不苟地测试项目。 \par
+测试阶段验证的问题会转换成分配给开发者的相应任务，问题可能会影响项目的发布。 \par
+开发者的基本任务不是立即修复问题，而是找到问题的根本原因。为了简单起见，让我们看一下generate\underline{ }username()函数，它使用随机数结合电子邮件来生成用户名: \par
+
+\begin{lstlisting}[caption={}]
+std::string generate_username(const std::string& email)
+{
+	int num = get_random_number();
+	std::string local_part = email.substr(0, email.find('@'));
+	return local_part + std::to_string(num);
+}
+\end{lstlisting}
+
+generate\underline{ }username()函数调用get\underline{ }random\underline{ }number()，将返回的值与电子邮件地址的私有部分结合起来。私有部分是电子邮件地址中@符号之前的部分。 \par
+QA工程师报告说，邮件中附在私有部分的数字一直是一样的。例如，对于电子邮件john@gmail.com，生成的用户名是john42，对于amanda@yahoo.com，生成的用户名是amanda42。因此，下一次使用电子邮件amanda@hotmail.com的用户试图在系统中注册时，生成的用户名amanda42与已经存在的用户名冲突。测试人员完全不知道项目的实现细节，所以他们会在用户名生成功能中报告这个问题。虽然您可能已经猜到真正的问题隐藏在get\underline{ }random\underline{ }number()函数中，但总是存在这样的情况，问题修复了，但没找到根本原因。修复问题的错误方法可能会改变generate\underline{ }username()函数的实现。generate\underline{ }random\underline{ }number()函数也可能在其他函数中使用，这反过来会使所有调用get\underline{ }random\underline{ }number()的函数得到错误结果。尽管例子很简单，但深入思考并找到问题背后的真正原因才是至关重要的。 \par
 
 \noindent\textbf{}\ \par
 \textbf{发布和维护} \ \par
+通过修复所有关键和主要问题，项目稳定之后，就可以发布了。有时候，公司发布的软件打着测试版的标签，这样就有了一个借口，以防用户发现软件漏洞百出。需要注意的是，很少有软件能够完美地工作。在发布之后，会出现更多的问题。因此，当开发人员致力于修复和发布更新时，就会进入维护阶段。 \par
+开发者有时开玩笑说，发布和维护是从未实现的步骤。然而，如果花了足够的时间来设计项目，那么发布第一个版本就不会花太多时间。正如我们在前一节已经介绍过的，设计从收集需求开始。之后，我们花时间定义规范，分解它们，分解成更小的组件，编码，测试，最后发布它。作为开发人员，我们对设计和编码阶段更感兴趣。如前所述，一个好的设计选择对进一步的项目开发有很大的影响。现在让我们从整体上仔细看看设计过程。 \par
 
 \noindent\textbf{}\ \par
 \textbf{深入设计过程} \ \par
+如前所述，在设计电子商务平台时，项目设计从列出一般实体开始，如用户、产品和仓库: \par
+
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-10/4}
+\end{center}
+
+然后我们将每个实体分解成更小的组件。为了让事情更清楚，把每个实体看作一个单独的类。当把一个实体看作一个类时，它在分解方面更有意义。例如，我们将User实体表示为一个类: \par
+
+\begin{lstlisting}[caption={}]
+class User
+{
+public:
+	// constructors and assignment operators are omitted for code brevity
+	void set_name(const std::string& name);
+	std::string get_name() const;
+	void set_email(const std::string&);
+	std::string get_email() const;
+	// more setters and getters are omitted for code brevity
+	
+private:
+	std::string name_;
+	std::string email_;
+	Address address_;
+	int age;
+};
+\end{lstlisting}
+
+User类的类图如下: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-10/5}
+\end{center}
+
+然而，正如我们已经讨论过的，User类的address字段可以表示为一个单独的类型(class或struct，这还不是很重要)。无论是数据聚合还是复杂类型，类图都需要进行以下更改: \par
+
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-10/6}
+\end{center}
+
+这些实体之间的关系将在设计过程中变得清晰。例如，地址本身不是一个实体，它是用户的一部分。也就是说，如果用户对象没有实例化，它就不能有实例。然而，正如我们可能希望指向可重用代码，地址类型也可以用于仓库对象。也就是说，用户和地址之间的关系是简单的聚合，而不是组合。 \par
+在讨论支付选项时，我们可以对User类型提出更多要求。该平台的用户应该能够插入为产品付费的选项。在决定如何在User类中表示支付选项之前，应该找出这些选项到底是什么。简单起见，假设支付选项包含信用卡号、持卡人姓名、到期日期和卡的安全码。这听起来像是另一种数据聚合，所以让我们将所有这些都收集到一个结构中，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+struct PaymentOption
+{
+	std::string number;
+	std::string holder_name;
+	std::chrono::year_month expiration_date;
+	int code;
+};
+\end{lstlisting}
+
+注意std::chrono::year\underline{ }month在前面的结构体中，表示特定年份的特定月份()C++20中引入)。大多数支付卡只携带卡过期的月份和年份，所以这个std::chrono::year\underline{ }month功能对于PaymentOption是完美的。 \par
+因此，在设计用户类的过程中，我们提出了一个新的类型——PaymentOption。一个用户可以有多个支付选项，因此User和PaymentOption之间的关系是一对多。现在让我们用这个新的聚合来更新我们的用户类图(虽然在这个例子中我们使用的是复合): \par
+
+\begin{center}
+	\includegraphics[width=1.\textwidth]{content/Section-2/Chapter-10/7}
+\end{center}
+
+User和PaymentOption之间的依赖关系如下代码所示: \par
+
+\begin{lstlisting}[caption={}]
+class User
+{
+public:
+	// code omitted for brevity
+	void add_payment_option(const PaymentOption& po) {
+		payment_options_.push_back(op);
+	}
+	std::vector get_payment_options() const {
+		return payment_options_;
+	}
+private:
+	// code omitted for brevity
+	std::vector<PaymentOption> payment_options_;
+};
+\end{lstlisting}
+
+即使用户可能设置了多个支付选项，我们也应该将其中一个标记为主要支付选项。这很棘手，因为我们可以将所有选项存储在vector中，但现在我们必须将其中一个选项作为主选项。 \par
+我们可以使用pair或tuple(如果比较花哨的话)，将vector中的选项映射为布尔值，以指示它是否是主值。下面的代码描述了前面介绍的User类中tuple的用法: \par
+
+\begin{lstlisting}[caption={}]
+class User
+{
+public:
+	// code omitted for brevity
+	void add_payment_option(const PaymentOption& po, bool is_primary) {
+		payment_options_.push_back(std::make_tuple(po, is_primary));
+	}
+
+	std::vector<std::tuple<PaymentOption, boolean> > get_payment_options()
+	const {
+		return payment_options_;
+	}
+private:
+	// code omitted for brevity
+	std::vector<std::tuple<PaymentOption, boolean> > payment_options_;
+};
+\end{lstlisting}
+
+我们可以通过以下方式，利用类型别名来简化代码: \par
+
+\begin{lstlisting}[caption={}]
+class User
+{
+public:
+	// code omitted for brevity
+	using PaymentOptionList = std::vector<std::tuple<PaymentOption, boolean>
+	>;
+	
+	// add_payment_option is omitted for brevity
+	PaymentOptionList get_payment_options() const {
+		return payment_options_;
+	}
+
+private:
+	// code omitted for brevity
+	PaymentOptionList payment_options_;
+};
+\end{lstlisting}
+
+下面是User类如何检索用户的主要支付选项: \par
+
+\begin{lstlisting}[caption={}]
+User john = get_current_user(); // consider the function is implemented and works
+auto payment_options = john.get_payment_options();
+for (const auto& option : payment_options) {
+	auto [po, is_primary] = option;
+	if (is_primary) {
+		// use the po payment option
+	}
+}
+\end{lstlisting}
+
+我们在访问for循环中的元组项时使用了结构化绑定。然而，在学习了关于数据结构和算法的章节之后，现在意识到搜索主要支付选项是一个线性操作。每次我们需要检索主要支付选项时都要遍历vector，这可能是一种糟糕的做法。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/tip}
+您可以更改底层的数据结构，以提高运行速度。元素的访问是常量时间复杂度时，速度会变得更快。在这个场景中，我们应该将一个布尔值映射为支付选项。对于除一个选项外的所有选项，布尔值都是相同的值。它将导致哈希冲突，这种冲突将通过将映射到相同散列表值的值链接在一起来处理。使用哈希表的唯一好处是对主要支付选项的固定时间访问。 \par
+\noindent\textbf{}\ \par
+
+最后，我们给出了在类中单独存储主要支付选项的最简单的解决方案。以下，是我们应该如何重写用户类中的支付选项处理部分: \par
+
+\begin{lstlisting}[caption={}]
+class User
+{
+public:
+	// code omitted for brevity
+	using PaymentOptionList = std::vector<PaymentOption>;
+	PaymentOption get_primary_payment_option() const {
+		return primary_payment_option_;
+	}
+
+	PaymentOptionList get_payment_options() const {
+		return payment_options_;
+	}
+
+	void add_payment_option(const PaymentOption& po, bool is_primary) {
+		if (is_primary) {
+			// moving current primary option to non-primaries
+			add_payment_option(primary_payment_option_, false);
+			primary_payment_option_ = po;
+			return;
+		}
+		payment_options_.push_back(po);
+	}
+
+private:
+	// code omitted for brevity
+	PaymentOption primary_payment_option_;
+	PaymentOptionList payment_options_;
+};
+\end{lstlisting}
+
+目前为止，我们经历了定义存储支付选项的方法的过程，只是为了展示编码之前的设计过程。虽然我们已经为单一情况下的支付选项创造了许多版本，但都不是最终版本。在支付选项向量中总是存在处理重复值的情况。当向用户添加一个支付选项作为主要选项，然后再添加另一个选项作为主要选项时，前一个选项将进入非主要列表。如果我们改变主意，再次将旧的支付选项添加为主要选项，其不会从非主要选项列表中删除。 \par
+所以，总有机会深入思考，避免潜在的问题。设计和编码是相辅相成的，也别忘了TDD。大多数情况下，在编写代码之前编写测试将帮助您发现许多问题。 \par
 
 \noindent\textbf{}\ \par
 \textbf{使用SOLID原则} \ \par
+有很多原则和设计方法可以在项目设计中使用。保持设计简单是最好的，然而，有一些原则在几乎所有项目中都是有用的。例如，SOLID由5个原则组成，其中的全部或部分原则可能对设计有用。 \par
+SOLID代表以下原则: \par
+
+\begin{itemize}
+	\item 单一责任原则
+	\item 开闭原则
+	\item 里氏替换原则
+	\item 接口分离原则
+	\item 依赖倒置原则
+\end{itemize}
+
+让我们结合例子来讨论下每个原则。
 
 \noindent\textbf{}\ \par
 \textbf{单一责任原则} \ \par
+单一责任原则强调简单，即一个对象一项任务。尽量减少对象功能关系的复杂性。让每个对象都有一个职责，不过把一个复杂的对象分解成更小更简单的组件并不总是那么容易。单一责任是一个上下文绑定的概念，不是关于在一个类中只有一个方法，而是关于让类或模块负责一件事。例如，我们前面设计的User类有一个职责:存储用户信息。然而，我们在User类中添加了支付选项，并强制它具有添加和删除支付选项的方法。我们还引入了一个主要的支付选项，它在用户方法中包含了额外的逻辑。 \par
+第一个建议将User类分解为两个单独的类。每个类都有一个单独的职责。下面的类图描述了这个想法: \par
+
+\begin{center}
+	\includegraphics[width=1.\textwidth]{content/Section-2/Chapter-10/8}
+\end{center}
+
+其中一个将只存储用户的基本信息，下一个将存储用户的支付选项。我们将它们命名为UserInfo和UserPaymentOptions。有些人可能会喜欢这个新设计，但我们会坚持旧的设计。这是为什么呢？虽然User类包含用户信息和支付选项，但后者也表示一条信息。我们设置和获取支付选项的方式与设置和获取用户电子邮件的方式相同。因此，我们保持User类不变，因为它满足了单一职责原则。当我们在User类中添加支付功能时，这将打破原始设计。在该场景中，User类将存储用户信息并进行支付事务。就单一责任原则而言，这是不可接受的，因此，我们不会这么做。 \par
+单一责任原则也与职能有关。add\underline{ }payment\underline{ }option()方法有两个职责。如果函数的第二个(默认)参数为true，将添加一个新的主要支付选项。否则，会将新的支付选项添加到非主要选项列表中。最好有一个单独的方法来添加一个主要的支付选项。这样，每个方法都有一个单独的职责。 \par
 
 \noindent\textbf{}\ \par
 \textbf{开闭原则} \ \par
+开闭原则是指类应该对扩展开放，但对修改关闭。这意味着当需要新的功能时，最好扩展基本功能,而不是修改。以设计的电子商务应用程序的Product类为例，下面是Product类的一个简单图: \par
+
+\begin{center}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-10/9}
+\end{center}
+
+每个Product对象有三个属性:名称、价格和重量。想象一下，在设计了产品类和整个电子商务平台之后，来自客户的新需求。他们现在想买数字产品，如：电子书、电影和录音。除了产品的重量之外，一切都很好。现在可能有两种产品——有形的和数字的——我们应该重新思考产品使用的逻辑。我们可以在产品中加入一个新功能，如下代码所示: \par
+
+\begin{lstlisting}[caption={}]
+class Product
+{
+public:
+	// code omitted for brevity
+	bool is_digital() const {
+		return weight_ == 0.0;
+	}
+	// code omitted for brevity
+};
+\end{lstlisting}
+
+显然，我们修改了类，违背了开闭原则。这个原则是说这个类应该关闭以进行修改。它应该开放扩展。我们可以通过重新设计Product类并使其成为所有产品的抽象基类来实现这一点。接下来，我们创建另外两个继承Product基类的类:PhysicalProduct和DigitalProduct。下面的类图描述了新的设计: \par
+
+\begin{center}
+	\includegraphics[width=0.6\textwidth]{content/Section-2/Chapter-10/10}
+\end{center}
+
+正如您在前面的图表中看到的，我们从Product类中删除了weight\underline{ }属性。现在我们又多了两个类，PhysicalProduct有一个weight\underline{ }property，而DigitalProduct没有。相反，其有一个file\underline{ }path\underline{ }属性。这种方法满足开闭原则，因为现在所有的类都可以扩展。我们使用继承来扩展类，下面的原则与之密切相关。 \par
 
 \noindent\textbf{}\ \par
 \textbf{里氏替换原则} \ \par
+里氏替换原则是以正确的方式继承。简单地说，如果有函数接受某种类型的参数，那么这个函数应该接受派生类型的参数。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/warn}
+里氏替代原理是以图灵奖得主、计算机科学博士Barbara Liskov的名字命名的。 \par
+\noindent\textbf{}\ \par
+
+当你理解了继承和里氏替换原理，你就很难忘记它。让我们继续开发Product类并添加一个新方法，该方法根据货币类型返回产品的价格。我们可以将价格存储在相同的货币单位中，并提供一个函数将价格转换为指定的货币。下面是该方法的简单实现: \par
+
+\begin{lstlisting}[caption={}]
+enum class Currency { USD, EUR, GBP }; // the list goes further
+
+class Product
+{
+public:
+	// code omitted for brevity
+	double convert_price(Currency c) {
+		// convert to proper value
+	}
+
+	// code omitted for brevity
+};
+\end{lstlisting}
+
+过了一段时间，该公司决定纳入所有数字产品的终身折扣。现在，所有的数码产品都有12\%的优惠。我们在DigitalProduct类中添加了一个单独的函数，该函数通过应用折扣返回转换后的价格。下面是它在DigitalProduct中的样子: \par
+
+\begin{lstlisting}[caption={}]
+class DigitalProduct : public Product
+{
+public:
+	// code omitted for brevity
+	double convert_price_with_discount(Currency c) {
+		// convert by applying a 12% discount
+	}
+};
+\end{lstlisting}
+
+设计上的问题显而易见。在DigitalProduct实例上调用convert\underline{ }price()不起作用。更糟糕的是，客户机代码不能调用它。它应该调用convert\underline{ }price\underline{ }with\underline{ }discount()，因为所有数字产品都必须以12\%的折扣销售。这种设计与里氏替换原理相矛盾。 \par
+我们应该记住多态的美妙之处，而不是破坏类的层次结构。更好的版本应该是这样的: \par
+
+\begin{lstlisting}[caption={}]
+class Product
+{
+public:
+	// code omitted for brevity
+	virtual double convert_price(Currency c) {
+		// default implementation
+	}
+
+	// code omitted for brevity
+};
+
+class DigitalProduct : public Product
+{
+public:
+	// code omitted for brevity
+	double convert_price(Currency c) override {
+		// implementation applying a 12% discount
+	}
+
+	// code omitted for brevity
+};
+\end{lstlisting}
+
+可以看到，我们不再需要convert\underline{ }price\underline{ }with\underline{ }discount()函数。里氏替换原则也成立。然而，我们应该再检查设计中的缺陷。让我们通过在基类中合并私有虚方法来计算折扣来改进它。以下更新版本的Product类包含一个名为calculate\underline{ }discount()的私有虚成员函数: \par
+
+\begin{lstlisting}[caption={}]
+class Product
+{
+public:
+	// code omitted for brevity
+	virtual double convert_price(Currency c) {
+		auto final_price = apply_discount();
+		// convert the final_price based on the currency
+	}
+
+private:
+	virtual double apply_discount() {
+		return getPrice(); // no discount by default
+	}
+
+	// code omitted for brevity
+};
+\end{lstlisting}
+
+convert\underline{ }price()函数调用私有apply\underline{ }discount()函数，该函数按原样返回价格。在派生类中重写apply\underline{ }discount()函数，如下面的DigitalProduct实现所示: \par
+
+\begin{lstlisting}[caption={}]
+class DigitalProduct : public Product
+{
+public:
+	// code omitted for brevity
+private:
+	double apply_discount() override {
+		return getPrice() * 0.12;
+	}
+	// code omitted for brevity
+};
+\end{lstlisting}
+
+我们不能在类之外调用私有函数，但可以在派生类中重写它。前面的代码展示了重写私有虚函数的优点。我们修改实现，保持接口不变。如果派生类不需要为折扣计算提供自定义功能，则不需要重写。另一方面，DigitalProduct在转换之前需要在价格上申请12\%的折扣。不需要修改基类的公共接口。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/warn}
+应该考虑重新思考Product类的设计。因为总是返回最新的有效价格，所以在getPrice()中直接调用apply\underline{ }discount()似乎更好。 \par
+\noindent\textbf{}\ \par
+
+设计过程是创造性的。由于出现了意想不到的新需求，重写所有代码并不少见。我们使用原则和方法来最小化实现新功能后可能出现的破坏性更改。SOLID的下一个原则是使您的设计更加灵活的最佳实践。 \par
 
 \noindent\textbf{}\ \par
 \textbf{接口分离原则} \ \par
+接口分离原则建议将复杂的接口划分为更简单的接口，这种分离允许类避免实现它们不使用的接口。 \par
+在电子商务应用程序中，我们应该实现产品交付、替换和过期功能。产品的运输将产品项目移动到其买家(现阶段我们不关心装运细节)。更换产品考虑更换损坏或丢失的产品后，运输给买家。最后，让产品过期意味着扔掉那些在过期日期前没有销售的产品。 \par
+我们可以自由地实现前面介绍的Product类中的所有功能。然而，我们会偶然发现一些类型的产品，例如：不能运输(例如，出售房子很少涉及运输给买家)。可能会有不可替代的产品。例如，一幅原画是不可能替代的，即使它丢失或损坏。最后，数字产品永远不会过期()大多数情况下是这样)。 \par
+我们不应该强迫客户端代码实现它不需要的行为，指的是实现类的行为。下面的例子是一个不好的做法，与接口隔离原则相矛盾: \par
+
+\begin{lstlisting}[caption={}]
+class IShippableReplaceableExpirable
+{
+public:
+	virtual void ship() = 0;
+	virtual void replace() = 0;
+	virtual void expire() = 0;
+};
+\end{lstlisting}
+
+现在，Product类实现了前面所示的接口，必须为所有的方法提供一个实现。接口隔离原则提出以下模型: \par
+
+\begin{lstlisting}[caption={}]
+class IShippable
+{
+public:
+	virtual void ship() = 0;
+};
+class IReplaceable
+{
+public:
+	virtual void replace() = 0;
+};
+class IExpirable
+{
+public:
+	virtual void expire() = 0;
+};
+\end{lstlisting}
+
+现在，Product类跳过实现任何接口。它的派生类从特定类型派生(实现)。下面的示例声明了几种产品类，每种产品类都支持前面介绍的有限数量的行为。请注意，为了代码简洁，我们省略了类的主体: \par
+
+\begin{lstlisting}[caption={}]
+class PhysicalProduct : public Product {};
+// The book does not expire
+class Book : public PhysicalProduct, public IShippable, public IReplaceable
+{
+};
+
+// A house is not shipped, not replaced, but it can expire
+// if the landlord decided to put it on sell till a specified date
+class House : public PhysicalProduct, public IExpirable
+{
+};
+
+class DigitalProduct : public Product {};
+
+// An audio book is not shippable and it cannot expire.
+// But we implement IReplaceable in case we send a wrong file to the user.
+class AudioBook : public DigitalProduct, public IReplaceable
+{
+};
+\end{lstlisting}
+
+如果您想打包一个下载的文件，请考虑为AudioBook实现IShippable。 \par
 
 \noindent\textbf{}\ \par
 \textbf{依赖倒置原则} \ \par
+最后，依赖倒置表明对象不应该强耦合，允许轻松地切换到另一个依赖项。例如，当用户购买一个产品时，我们发送一个关于购买的收据。从技术上讲，发送收据有几种方式，即通过邮件打印发送，通过电子邮件发送，或在平台的用户账户页面上显示收据。对于后者，我们通过电子邮件或应用程序向用户发送通知，告诉他们收据已经可以查看了。看看下面打印收据的接口: \par
+
+\begin{lstlisting}[caption={}]
+class IReceiptSender
+{
+public:
+	virtual void send_receipt() = 0;
+};
+\end{lstlisting}
+
+让我们假设我们已经实现了Product类中的purchase()方法。完成后，我们发送收据。下面的代码发送了收据: \par
+
+\begin{lstlisting}[caption={}]
+class Product
+{
+public:
+	// code omitted for brevity
+	void purchase(IReceiptSender* receipt_sender) {
+		// purchase logic omitted
+		// we send the receipt passing purchase information
+		receipt_sender->send(/* purchase-information */);
+	}
+};
+\end{lstlisting}
+
+我们可以根据需要添加尽可能多的收据打印选项来扩展应用程序。下面的类实现了IReceiptSender接口: \par
+
+\begin{lstlisting}[caption={}]
+class MailReceiptSender : public IReceiptSender
+{
+public:
+	// code omitted for brevity
+	void send_receipt() override { /* ... */ }
+};
+\end{lstlisting}
+
+另外两个类——EmailReceiptSender和InAppReceiptSender——都实现了IReceiptSender。因此，要使用特定的收据，我们只需通过purchase()方法将依赖注入到Product类当中，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+IReceiptSender* rs = new EmailReceiptSender();
+// consider the get_purchasable_product() is implemented somewhere in the code
+auto product = get_purchasable_product();
+product.purchase(rs);
+\end{lstlisting}
+
+我们可以更进一步，在User类中实现一个方法，返回具体用户想要的收据发送选项。这将使类更加解耦。 \par
+前面讨论的所有SOLID原则是一个自然的方式组合类。并不是必须要坚持这些原则，但它将会改进你的设计。 \par
 
 \noindent\textbf{}\ \par
 \textbf{使用域驱动的设计} \ \par
+域是程序的主区域。我们正在讨论和设计一个以电子商务为主要概念，领域为电子商务平台。我们建议您在项目中考虑领域驱动设计。然而，这种方法也并不是程序设计的灵丹妙药。 \par
+为了方便设计项目，有以下三层架构: \par
+
+\begin{itemize}
+	\item 业务描述
+	\item 业务逻辑
+	\item 业务数据
+\end{itemize}
+
+三层架构适用于客户端-服务器软件，就像我们在本章设计的那样。表述层向用户提供与产品、购买和运输相关的信息。它通过将结果输出到客户端来与其他层进行通信。它是客户端可以直接访问的层，例如：web浏览器。 \par
+业务逻辑关心应用程序的功能。例如，用户浏览表示层提供的产品，并决定购买其中之一。处理请求是业务层的任务。在领域驱动的设计中，我们倾向于结合领域的实体，其属性可用来解决应用程序的复杂性。我们将用户作为User类的实例处理，将产品作为Product类的实例处理，以此类推。业务逻辑将购买产品的用户解释为创建Order对象的用户对象，而Order对象又与Product对象相关。然后，将Order对象绑定到与购买该产品相关的事务对象。购买的相应结果通过表述层表示。 \par
+最后，数据层处理数据的存储和检索。从用户身份验证到产品购买，每个步骤都是从系统数据库检索或记录在系统数据库。 \par
+将应用程序划分为几个层可以处理复杂性，编写具有单一职责的对象要好得多。领域驱动设计将实体与没有概念标识的对象区分开来，后者称为对象。例如，用户不区分每个事务，他们只关心事务所代表的信息。另一方面，User对象具有User类(实体)形式的标识。 \par
+使用其他对象(或不使用)的对象上允许的操作，称为命名服务。服务是一种不绑定到特定对象的操作，例如：通过set\underline{ }name()方法设置用户名是不应该视为服务的操作。另一方面，用户购买产品是一种由服务封装的操作。 \par
+最后，领域驱动的设计集成了存储库和工厂模式。存储库模式负责检索和存储域对象的方法，工厂模式创建域对象。使用这些模式允许在需要的时候交换替代的实现。现在，让我们来看看电子商务平台中设计模式的威力。 \par
 
 \noindent\textbf{}\ \par
 \textbf{利用设计模式} \ \par
+设计模式是软件设计中的体系结构解决方案。需要注意的是，设计模式既不是方法，也不是算法。它们是一种体系结构构造，提供了一种组织类及其关系的方法，以便在代码可维护性方面获得更好的结果。即使以前没有使用过一个设计模式，在软件设计中许多问题往往会重复出现。例如，为现有库创建更好的接口是一种称为Facade模式。设计模式有名称，以便开发者在对话或文档中使用。您应该很自然地与使用Facade模式、工厂模式等的其他开发者沟通。 \par
+我们前面已经提到过，域驱动的设计合并了存储库和工厂模式。现在让我们来看看它们是什么，以及它们在我们的设计工作中有什么用处。 \par
 
 \noindent\textbf{}\ \par
 \textbf{库模式} \ \par
+正如Martin Fowler所描述的那样，存储库模式“使用一个用于访问域对象的类集成接口在域层和数据映射层间充当中介”。 \par
+该模式为数据操作提供了简单的方法，不需要直接使用数据库驱动程序。添加、更新、删除或选择适合应用程序域。 \par
+其中一种方法是创建提供必要函数的通用存储库类。简单接口如下: \par
 
-\noindent\textbf{}\ \par
-\textbf{库模式} \ \par
+\begin{lstlisting}[caption={}]
+class Entity; // new base class
 
+template <typename T, typename = std::enable_if_t<std::is_base_of_v<Entity,
+T>>>
+class Repository
+{
+	public:
+	T get_by_id(int);
+	void insert(const T&);
+	void update(const T&);
+	void remove(const T&);
+	std::vector<T> get_all(std::function<bool(T)> condition);
+};
+\end{lstlisting}
+
+我们引入了一个名为Entity的新类。Repository类处理实体，并确保每个实体都符合实体的相同接口，将std::enable\underline{ }if和std::is\underline{ }base\underline{ }of\underline{ }v应用到模板参数中。 \par
+
+\hspace*{\fill} \\ %插入空行
+\includegraphics[width=0.05\textwidth]{images/warn}
+std::is\underline{ }base\underline{ }of\underline{ }v是std::is\underline{ }base\underline{ }of<>::value的简短表示。同样，std::enable\underline{ }if\underline{ }t替换了std::enable\underline{ }if<>::type。 \par
 \noindent\textbf{}\ \par
-\textbf{库模式} \ \par
+
+Entity类就像下面这样简单: \par
+
+\begin{lstlisting}[caption={}]
+class Entity
+{
+public:
+	int get_id() const;
+	void set_id(int);
+private:
+	int id_;
+};
+\end{lstlisting}
+
+每个业务对象都是一个实体。因此，前面讨论的类应该更新为从Entity继承。例如，User类采用以下形式: \par
+
+\begin{lstlisting}[caption={}]
+class User : public Entity
+{
+	// code omitted for brevity
+};
+\end{lstlisting}
+
+因此，我们可以用以下方式来使用存储库: \par
+
+\begin{lstlisting}[caption={}]
+Repository<User> user_repo;
+User fetched_user = user_repo.get_by_id(111);
+\end{lstlisting}
+
+前面的存储库模式只是对这个主题的简单介绍，但可以使它更加强大，类似于立面的图案。尽管使用Facade模式的重点不是访问数据库，但仍然可以用这个示例来解释它。Facade模式包装了一个或多个复杂的类，为客户机提供了预定义接口来处理底层功能。 \par
 
 \noindent\textbf{}\ \par
 \textbf{工厂模式} \ \par
+当程序员谈论工厂模式时，他们可能会混淆工厂方法和抽象工厂模式，这两种创建模式都提供了各种创建机制。让我们讨论一下工厂的方法。它提供了一个在基类中创建对象的接口，并允许派生类修改将要创建的对象。 \par
+现在是处理物流的时候了，工厂方法会帮助我们。当开发一个提供产品发货的电子商务平台时，应该考虑到并非所有用户都居住在仓库所在的同一区域。所以，将产品从仓库运送给买家，你应该选择合适的运输方式，自行车、无人机、卡车等。设计一个灵活的物流管理系统是研究的重点。 \par
+不同的运输方式需要不同的实现。然而，它们都符合一个接口。以下是传输接口及其派生的特定传输实现类图: \par
+
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-10/11}
+\end{center}
+
+上图中的每个具体类都提供了交付的具体实现。 \par
+假设我们设计了以下物流基类，负责与物流相关的行动，包括选择合适的运输方式，如下图所示: \par
+
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-10/12}
+\end{center}
+
+前面应用的工厂方法允许增加新的运输类型和新的物流方法。请注意createTransport()方法，它返回一个指向Transport的指针。派生类覆盖该方法，每个派生类都返回Transport的子类，因此提供了特定的传输模式，否则，我们不能在重写基类方法时返回不同的类型。 \par
+物流中的createTransport()如下所示: \par
+
+\begin{lstlisting}[caption={}]
+class Logistics
+{
+	public:
+	Transport* getLogistics() = 0;
+	// other functions are omitted for brevity
+};
+\end{lstlisting}
+
+Transport类表示无人机、卡车和船舶的基类。这意味着我们可以为它们创建一个实例，并使用一个Transport指针来引用它们，如下所示: \par
+
+\begin{lstlisting}[caption={}]
+Transport* ship_transport = new Ship();
+\end{lstlisting}
+
+这是工厂模式的基础，因为RoadLogistics，例如：复写getLogistics(): \par
+
+\begin{lstlisting}[caption={}]
+class RoadLogistics : public Logistics
+{
+public:
+	Truck* getLogistics() override {
+		return new Truck();
+	}
+}
+\end{lstlisting}
+
+注意函数的返回类型，它是Truck而不是Transport。它能起作用是因为卡车继承了Transport。另外，还可以看到对象创建是如何与对象本身解耦的。创建新对象通过工厂完成，这与前面讨论的SOLID原则保持一致。 \par
+乍一看，利用设计模式将额外的复杂性合并到设计中，这可能令人困惑。然而，在实践设计模式时，应该具有更好的设计，因为允许项目的灵活性和可扩展性。 \par
 
 \noindent\textbf{}\ \par
 \textbf{总结} \ \par
+软件开发需要细致的规划和设计。本章中，我们了解到项目开发包括以下步骤: \par
+
+\begin{itemize}
+	\item 需求收集和分析:了解项目的领域，讨论并确定应该实现的特性。
+	\item 创建规则说明:记录需求和项目功能。
+	\item 设计和测试计划:指从较大的实体开始设计项目，将每个实体分解为与项目中的其他类相关的单独的类。这一步还包括计划如何测试项目。
+	\item 编码:此步骤涉及编写代码，以实现前面步骤中指定的项目。
+	\item 测试和稳定性:根据预先计划的用例和场景检查项目，以发现问题并修复它们。
+	\item 发布和维护:项目发布和维护是最后一步。
+\end{itemize}
+
+项目设计对开发者来说是一项复杂的任务。他们应该提前考虑，因为部分特性是在开发过程中引入的。 \par
+为了使设计更灵活和健壮，我们讨论了更好架构的原则和模式。我们已经了解了设计一个复杂软件项目的过程。 \par
+避免糟糕设计决策的最佳方法之一是，遵循已经设计好的模式和实践。应该考虑在未来的项目中，使用可靠的原则和经过验证的设计模式。 \par
+下一章中，我们将设计一款策略游戏。将熟悉的设计模式进行应用，并看到它们如何出现在游戏开发中。 \par
 
 \noindent\textbf{}\ \par
 \textbf{问题} \ \par
