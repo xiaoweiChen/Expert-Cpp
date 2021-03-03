@@ -104,7 +104,7 @@ g++编译器需要添加编译选项 \texttt{-std=c++2a} 来编译本章的代�
 当我们浏览其他角色单位时，我们将为每个角色单位想出一个基类。每个特定的单元将从这个基类继承，并添加特定的属性(如果有的话)。以下是角色单位的完整类图: \par
 
 \begin{center}
-	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-11/5}
+	\includegraphics[width=0.6\textwidth]{content/Section-2/Chapter-11/5}
 \end{center}
 
 请注意基类——它是一个接口，而不是一个常规类。它定义了在派生类中实现的纯虚函数。以下是CharacterUnit接口在代码中的声明: \par
@@ -535,7 +535,7 @@ while (true)
 如果没有需要处理的用户操作，上述代码将快速运行。它在速度较快的机器上运行得更快(目标是坚持16毫秒每帧)。这可能需要我们在处理动作和更新游戏状态后等待一段时间，如下图所示: \par
 
 \begin{center}
-	\includegraphics[width=1.0\textwidth]{content/Section-2/Chapter-11/12}
+	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-11/12}
 \end{center}
 
 每次更新都将游戏时间提前一个固定的时间，这需要在现实世界中处理一个固定的时间。另一方面，如果一个帧的处理时间超过了指定的毫秒，游戏就会变慢。 \par
