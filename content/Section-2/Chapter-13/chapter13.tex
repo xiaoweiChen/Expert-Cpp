@@ -1,0 +1,134 @@
+调试和测试在软件开发过程的管道中扮演着极其重要的角色。测试可以帮助我们发现问题，而调试可以修复问题。然而，如果我们在实现阶段遵循一定的规则，许多潜在的缺陷是可以避免的。此外，由于测试过程非常昂贵，如果能够在人工测试之前使用某些工具自动分析软件，那就很好了。此外，我们应该在什么时候、如何以及对什么软件进行测试也很重要。 \par
+
+本章中，我们将了解以下内容: \par
+
+\begin{itemize}
+	\item 了解问题的根本原因
+	\item 调试C++程序
+	\item 了解静态和动态分析
+	\item 理解C++中的安全问题
+	\item 探索单元测试、TDD和BDD
+\end{itemize}
+
+这一章中，我们将学习如何分析一个软件缺陷，如何使用GNU调试器(GDB)工具来调试一个程序，以及如何使用工具来自动分析软件。我们还将学习单元测试、测试驱动开发(TDD)和行为驱动开发(BDD)的概念，以及如何在软件工程开发过程中实践使用它们。 \par
+
+\noindent\textbf{}\ \par
+\textbf{代码位置} \ \par
+可以从这里获取本章的源码文件：https:/​/github.​com/PacktPublishing/Expert-CPP \par
+
+\noindent\textbf{}\ \par
+\textbf{了解问题的根本原因} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{RCA概述} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{防患于未然——是一种良好的编码习惯} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{未初始化变量的问题} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{复合表达式中的副作用} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{混合有符号和无符号的问题} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{问题顺序} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{编译时检查与运行时检查} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{避免内存泄漏} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{调试C++程序} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{调试C/C++程序的工具} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{GDB概述} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{使用GDB的例子} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{设置断点和检查变量值} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{函数断点、条件断点、watchpoint以及continue和finish命令} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{将GDB记录输出到文本文件中} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{实际调试策略} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{了解静态和动态分析} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{静态分析} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{动态分析} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{探索单元测试、TDD和BDD} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{单元测试} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{TDD} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{TDD的例子} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{步骤1 -编写一个失败的测试} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{步骤2 -开发代码让测试通过} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{步骤3 -重构} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{BDD} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{总结} \ \par
+
+
+\noindent\textbf{}\ \par
+\textbf{扩展阅读} \ \par
+
+\noindent\textbf{}\ \par
+\textbf{扩展阅读} \ \par
+\begin{itemize}
+	\item J. Rooney and L. Vanden Heuvel,  Root Cause Analysis For Beginners , Quality Progress, July 2004, p.45-53.
+	\item T. Kataoka, K. Furuto and T. Matsumoto,  The Analyzing Method of Root Causes for Software Problem s, SEI Tech. Rev., no. 73, p. 81, 2011.
+	\item K. A. Briski, et al.  Minimizing code defects to improve software quality and lower development costs , IBM Rational Software Analyzer and IBM	Rational PurifyPlus software.
+	\item https://www.learncpp.com/cpp-programming/eight-c-programming-mistakes-the-compiler-wont-catch .
+	\item B. Stroustrup and H. Sutter, C++ Core Guidelines:  https:/​/​isocpp.​github.​io/CppCoreGuidelines 
+\end{itemize}
+
+\noindent\textbf{}\ \par
+\textbf{练习和问题} \ \par
+\begin{enumerate}
+	\item 使用gdb对ch13\underline{ }gdb\underline{ }2.cpp进行断点、条件断点的设置，以及watchpoint，continue和finish命令的使用。
+	\item 使用g++ -c -Wall - weffc++ -Wextra x.cpp -o x.out编译cpp文件ch13\underline{ }rca*.cpp。你从警告中了解了什么?
+	\item 为什么静态分析会产生误报，而动态分析不会?
+	\item 下载ch13\underline{ }tdd\underline{ }v2.h/.cpp并执行下一阶段的重构。这时，我们将添加复制构造函数、赋值操作符和元素操作符，如+、-、*、/等。具体来说，要做到以下几点:
+	\begin{enumerate}
+		\item 将第三个测试用例添加到我们的测试套件中，即ch13\underline{ }tdd\underline{ }Boost\underline{ }UTF2.cpp。
+		\item 将这些函数的实现添加到文件中，例如：ch13tdd\underline{ }v2.h / . cpp
+		\item 运行测试套件进行测试。
+	\end{enumerate}
+\end{enumerate}
+
+\newpage
