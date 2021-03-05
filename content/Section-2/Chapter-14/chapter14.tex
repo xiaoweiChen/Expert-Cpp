@@ -7,7 +7,7 @@ C++不提供开箱即用的图形用户界面(GUI)编程。首先，我们应该
 \begin{itemize}
 	\item 跨平台GUI编程基础
 	\item Qt核心组件
-	\item 使用Qt小部件
+	\item 使用Qt widget
 	\item 用Qt网络设计一个网络应用程序
 \end{itemize}
 
@@ -77,7 +77,7 @@ Qt是一个流行的用于创建GUI应用程序的工具包。它允许我们创
 \begin{itemize}
 	\item Qt Core: 核心类
 	\item Qt GUI: GUI组件的基类
-	\item Qt Widgets: 用C++小部件扩展Qt GUI的类
+	\item Qt Widgets: 用C++ widget扩展Qt GUI的类
 	\item Qt Multimedia: 音频、视频、广播和相机功能的课程
 	\item Qt Multimedia Widgets: 用于实现多媒体功能的类
 	\item Qt Network: 网络编程类(我们将在本章中使用它们)
@@ -137,13 +137,13 @@ int main(int argc, char** argv)
 }
 \end{lstlisting}
 
-让我们看看代码中使用的各种组件。第一个是QtWidgets头文件，它包含小部件组件，我们可以使用这些组件为应用程序构建细粒度的GUI。接下来是QPushButton类，它表示可单击按钮的包装器。我们在这里有意地把它作为一个包装器来介绍，以便在本章后面讨论Qt程序的编译过程时能够解释它。下面是运行上述代码的结果: \par
+让我们看看代码中使用的各种组件。第一个是QtWidgets头文件，它包含widget组件，我们可以使用这些组件为应用程序构建细粒度的GUI。接下来是QPushButton类，它表示可单击按钮的包装器。我们在这里有意地把它作为一个包装器来介绍，以便在本章后面讨论Qt程序的编译过程时能够解释它。下面是运行上述代码的结果: \par
 
 \begin{center}
 	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-14/5}
 \end{center}
 
-我们只声明了QPushButton类，但它显示为一个带有操作系统标准的关闭和最小化按钮的窗口(在示例中，这是macOS)。这样做的原因是QPushButton间接继承自QWidget，它是一个带有框架的widget，也就是一个窗口。这个按钮几乎占据了整个窗口的空间。我们可以调整窗口的大小，看看按钮是如何随它一起调整大小的。我们将在本章后面更详细地讨论小部件。 \par
+我们只声明了QPushButton类，但它显示为一个带有操作系统标准的关闭和最小化按钮的窗口(在示例中，这是macOS)。这样做的原因是QPushButton间接继承自QWidget，它是一个带有框架的widget，也就是一个窗口。这个按钮几乎占据了整个窗口的空间。我们可以调整窗口的大小，看看按钮是如何随它一起调整大小的。我们将在本章后面更详细地讨论widget。 \par
 当我们运行app.exec()时，GUI就会构建。注意app对象的类型。它是一个QApplication对象。这是Qt应用程序的起点。当我们调用exec()函数时，我们开始Qt的事件循环。为了理解GUI应用程序的生命周期，我们应该稍微改变一下对程序执行的看法。在第7章之后，重新定义程序构造和执行的概念并不奇怪这里需要了解的主要内容是GUI应用程序有一个与主程序一起运行的额外实体。这个实体称为事件循环。 \par
 
 \hspace*{\fill} \\ %插入空行
@@ -196,7 +196,7 @@ int main(int argc, char** argv)
 	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-14/7}
 \end{center}
 
-窗口对象是QWidget类型的。QWidget是所有用户界面对象的中心类。无论何时您想要创建一个自定义小部件或扩展一个现有的小部件，您都可以直接或间接地从QWidget继承。它为每个用例提供了很多功能。您可以使用move()函数在屏幕中移动它，也可以通过调用showFullScreen()使窗口全屏等。在前面的代码中，我们调用了resize()函数，该函数获取小部件的宽度和高度以调整其大小。另外，请注意setWindowTitle()函数，它执行tin上所说的操作——它将传递的字符串参数设置为窗口的标题。在代码中使用字符串值时，最好使用QApplication::translate()函数。它使程序的本地化变得更容易，因为当语言设置改变时，Qt会自动用正确的翻译替换文本。QObject::tr()提供了相同的功能。 \par
+窗口对象是QWidget类型的。QWidget是所有用户界面对象的中心类。无论何时您想要创建一个自定义widget或扩展一个现有的widget，您都可以直接或间接地从QWidget继承。它为每个用例提供了很多功能。您可以使用move()函数在屏幕中移动它，也可以通过调用showFullScreen()使窗口全屏等。在前面的代码中，我们调用了resize()函数，该函数获取widget的宽度和高度以调整其大小。另外，请注意setWindowTitle()函数，它执行tin上所说的操作——它将传递的字符串参数设置为窗口的标题。在代码中使用字符串值时，最好使用QApplication::translate()函数。它使程序的本地化变得更容易，因为当语言设置改变时，Qt会自动用正确的翻译替换文本。QObject::tr()提供了相同的功能。 \par
 
 \hspace*{\fill} \\ %插入空行
 \includegraphics[width=0.05\textwidth]{images/warn}
@@ -316,7 +316,7 @@ QOBject::connect(&btn, SIGNAL(clicked()), &lbl, SLOT(setCustomText()));
 当模型遇到数据中的更改时，它会通知视图。另一方面，用户与呈现数据项的交互是由视图发出的信号通知的。最后，来自委托的信号将数据编辑的状态通知模型和视图。 \par
 模型基于QAbstractItemModel类，该类定义了视图和委托使用的接口。Qt提供了一组不需要修改就可以使用的现有模型类，但如果您需要创建新的模型，应该从QAbstractItemModel继承您的类。例如，QStringListModel、QStandardItemModel和QFileSystemModel类可以处理数据项。QStringListModel用于存储字符串项列表(表示为QString对象)。此外，还有一些方便使用SQL数据库的模型类。QSqlQueryModel、QSqlTableModel和QSqlRelationalTableModel允许我们在模型/视图约定的上下文中访问关系数据库。 \par
 视图和代理也有相应的抽象类，即QAbstractItemView和QAbstractItemDelegate。Qt提供了可以立即使用的现有视图，如QListView、QTableView和QTreeView。这些是大多数应用程序处理的基本视图类型。QListView显示项目列表，QTableView显示表中的数据，QTreeView显示层次化列表中的数据。如果你想使用这些视图类，Qt建议从QAbstractListModel或QAbstractTableModel继承自定义模型，而不是子类化QAbstractItemModel。 \par
-QListView、QTreeView和QTableView认为是核心类和低级类。还有一些更方便的类可以为新手Qt使用者提供更好的可用性——QListWidget、QTreeWidget和QTableWidget。我们将在本章的下一节看到使用小部件的例子。在此之前，让我们看一个简单的QListWidget的运行示例: \par
+QListView、QTreeView和QTableView认为是核心类和低级类。还有一些更方便的类可以为新手Qt使用者提供更好的可用性——QListWidget、QTreeWidget和QTableWidget。我们将在本章的下一节看到使用widget的例子。在此之前，让我们看一个简单的QListWidget的运行示例: \par
 
 \begin{lstlisting}[caption={}]
 #include <QListWidget>
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 }
 \end{lstlisting}
 
-将项目添加到列表小部件的方法之一是创建它们，我们可以通过将列表小部件设置为其所有者来实现。下面的代码中，我们声明了三个QListWidgetItem对象，每个对象都有一个名称，并与前面声明的列表小部件相关联: \par
+将项目添加到列表widget的方法之一是创建它们，我们可以通过将列表widget设置为其所有者来实现。下面的代码中，我们声明了三个QListWidgetItem对象，每个对象都有一个名称，并与前面声明的列表widget相关联: \par
 
 \begin{lstlisting}[caption={}]
 new QListWidgetItem("Amat", listWgt);
@@ -337,7 +337,7 @@ new QListWidgetItem("Samvel", listWgt);
 new QListWidgetItem("Leia", listWgt);
 \end{lstlisting}
 
-或者，我们可以声明一个item，然后将它插入到list小部件中: \par
+或者，我们可以声明一个item，然后将它插入到listwidget中: \par
 
 \begin{lstlisting}[caption={}]
 QListWidgetItem* newName{new QListWidgetItem};
@@ -377,11 +377,11 @@ QListView lview;
 lview.setModel(model);
 \end{lstlisting}
 
-在熟悉Qt提供的各种小部件之后，我们将在下一节继续这个示例。 \par
+在熟悉Qt提供的各种widget之后，我们将在下一节继续这个示例。 \par
 
 \noindent\textbf{}\ \par
-\textbf{使用Qt小部件} \ \par
-小部件是可视的GUI组件。如果一个小部件没有父部件，它将被视为一个窗口，或者称为顶级小部件。在本章的前面，我们在Qt中创建了一个尽可能简单的窗口，如下所示代码: \par
+\textbf{使用Qtwidget} \ \par
+widget是可视的GUI组件。如果一个widget没有父部件，它将被视为一个窗口，或者称为顶级widget。在本章的前面，我们在Qt中创建了一个尽可能简单的窗口，如下所示代码: \par
 
 \begin{lstlisting}[caption={}]
 #include <QtWidgets>
@@ -418,27 +418,27 @@ int main(int argc, char** argv)
 }
 \end{lstlisting}
 
-观察QPushButton构造函数的第二个参数。我们传递了一个窗口对象的引用作为它的父对象。当父对象被销毁时，它的子对象会自动销毁。Qt还支持许多其他小部件，让我们来看看其中的一些。 \par
+观察QPushButton构造函数的第二个参数。我们传递了一个窗口对象的引用作为它的父对象。当父对象被销毁时，它的子对象会自动销毁。Qt还支持许多其他widget，让我们来看看其中的一些。 \par
 
 \noindent\textbf{}\ \par
-\textbf{常见的Qt小部件} \ \par
-上一节中，我们介绍了QPushButton类，并说明了它间接继承了QWidget类。为了创建一个窗口，我们使用QWidget类。结果是，QWidget代表了呈现到屏幕的能力，它是所有小部件继承的基本类。它有很多属性和函数，比如enabled，一个boolean属性，如果小部件启用，该属性为true。要访问它，我们使用isEnabled()和setEnabled()函数。为了控制小部件的大小，我们使用它的高度和宽度，这表示小部件的高度和宽度。为了获得它们的值，我们分别调用height()和width()。要设置新的高度和宽度，应该使用resize()函数，该函数接受两个参数——宽度和高度。还可以使用setMinimumWidth()、setMinimumHeight()、setMaximumWidth()和setMaximumHeight()函数来控制小部件的最小和最大尺寸。当在布局中设置小部件时，这可能会很有用(请参阅下一节)。除了属性和函数外，我们主要对QWidget的公共槽感兴趣，具体如下: \par
+\textbf{常见的Qtwidget} \ \par
+上一节中，我们介绍了QPushButton类，并说明了它间接继承了QWidget类。为了创建一个窗口，我们使用QWidget类。结果是，QWidget代表了呈现到屏幕的能力，它是所有widget继承的基本类。它有很多属性和函数，比如enabled，一个boolean属性，如果widget启用，该属性为true。要访问它，我们使用isEnabled()和setEnabled()函数。为了控制widget的大小，我们使用它的高度和宽度，这表示widget的高度和宽度。为了获得它们的值，我们分别调用height()和width()。要设置新的高度和宽度，应该使用resize()函数，该函数接受两个参数——宽度和高度。还可以使用setMinimumWidth()、setMinimumHeight()、setMaximumWidth()和setMaximumHeight()函数来控制widget的最小和最大尺寸。当在布局中设置widget时，这可能会很有用(请参阅下一节)。除了属性和函数外，我们主要对QWidget的公共槽感兴趣，具体如下: \par
 
 \begin{itemize}
-	\item close() :关闭小部件。
-	\item hide() : 与setVisible(false)相同，这个函数隐藏了小部件。
-	\item lower()和raise() :在父部件的堆栈中移动小部件(到底部或顶部)。每个小部件都可以有一个父部件。没有父窗口小部件的小部件将成为一个独立窗口。我们可以使用setWindowTitle()和setWindowIcon()函数为这个窗口设置一个标题和一个图标。
-	\item style:该属性保存小部件的样式。为了修改它，我们使用setStyleSheet()函数传递描述小部件样式的字符串。另一种方法是调用setStyle()函数并传递封装与样式相关属性的QStyle类型对象。
+	\item close() :关闭widget。
+	\item hide() : 与setVisible(false)相同，这个函数隐藏了widget。
+	\item lower()和raise() :在父部件的堆栈中移动widget(到底部或顶部)。每个widget都可以有一个父部件。没有父窗口widget的widget将成为一个独立窗口。我们可以使用setWindowTitle()和setWindowIcon()函数为这个窗口设置一个标题和一个图标。
+	\item style:该属性保存widget的样式。为了修改它，我们使用setStyleSheet()函数传递描述widget样式的字符串。另一种方法是调用setStyle()函数并传递封装与样式相关属性的QStyle类型对象。
 \end{itemize}
 
-Qt部件几乎拥有所有必要的属性，可以开箱即用。很少会遇到必须构建自己的小部件的情况。然而，有些团队为他们的软件创建了一整套定制小部件。如果您计划为程序定制外观，那么这是很好的。例如，可以合并平面样式的小部件，这意味着您必须修改框架提供的默认小部件的样式。自定义小部件应该继承自QWidget(或其任何后代)，如下所示: \par
+Qt部件几乎拥有所有必要的属性，可以开箱即用。很少会遇到必须构建自己的widget的情况。然而，有些团队为他们的软件创建了一整套定制widget。如果您计划为程序定制外观，那么这是很好的。例如，可以合并平面样式的widget，这意味着您必须修改框架提供的默认widget的样式。自定义widget应该继承自QWidget(或其任何后代)，如下所示: \par
 
 \begin{lstlisting}[caption={}]
 class MyWidget : public QWidget
 {};
 \end{lstlisting}
 
-如果希望小部件公开信号和槽，则需要在类声明的开头使用Q\underline{ }OBJECT宏。更新后的MyWidget类的定义如下: \par
+如果希望widget公开信号和槽，则需要在类声明的开头使用Q\underline{ }OBJECT宏。更新后的MyWidget类的定义如下: \par
 
 \begin{lstlisting}[caption={}]
 class MyWidget : public QWidget
@@ -453,7 +453,7 @@ public slots:
 };
 \end{lstlisting}
 
-正如您可能已经猜到的，信号没有访问修饰符，而槽可以分为公共、私有和受保护的部分。正如我们前面提到的，Qt提供了足够的开箱即用的小部件。为了研究小部件集，Qt提供了一组将小部件组合在一起的示例。如果您已经安装了Qt Creator(用于开发Qt应用程序的IDE)，那么您应该能够在一次单击中浏览这些示例。下面是它在Qt Creator中看起来的样子: \par
+正如您可能已经猜到的，信号没有访问修饰符，而槽可以分为公共、私有和受保护的部分。正如我们前面提到的，Qt提供了足够的开箱即用的widget。为了研究widget集，Qt提供了一组将widget组合在一起的示例。如果您已经安装了Qt Creator(用于开发Qt应用程序的IDE)，那么您应该能够在一次单击中浏览这些示例。下面是它在Qt Creator中看起来的样子: \par
 
 \begin{center}
 	\includegraphics[width=1.0\textwidth]{content/Section-2/Chapter-14/12}
@@ -477,23 +477,23 @@ public slots:
 	\includegraphics[width=0.8\textwidth]{content/Section-2/Chapter-14/15}
 \end{center}
 
-前面的屏幕截图显示了在一个应用程序中组合在一起的各种小部件。以下是我们在GUI应用程序开发中经常使用的一些最常见的小部件: \par
+前面的屏幕截图显示了在一个应用程序中组合在一起的各种widget。以下是我们在GUI应用程序开发中经常使用的一些最常见的widget: \par
 
 \begin{itemize}
 	\item QCheckBox : 表示带有文本标签的复选框。
-	\item QDateEdit : 表示可用于输入日期的小部件。如果想要输入时间，也可以使用QDateTimeEdit。
+	\item QDateEdit : 表示可用于输入日期的widget。如果想要输入时间，也可以使用QDateTimeEdit。
 	\item QLabel : 文本显示。也用于显示图像。
 	\item QLineEdit :一个单行编辑框。
 	\item QProgressBar : 呈现一个垂直或水平的进度条。
-	\item QTabWidget : 作为标签小部件的堆栈。这是许多组织者小部件中的一个。其他一些是QButtonGroup、QGroupBox和QStackedWidget。
+	\item QTabWidget : 作为标签widget的堆栈。这是许多组织者widget中的一个。其他一些是QButtonGroup、QGroupBox和QStackedWidget。
 \end{itemize}
 
-前面的列表不是最终的，但是它给出了Qt功能的基本概念。我们这里使用的地址簿示例使用了许多这样的小部件。QTabWidget表示一个组织小部件，将几个小部件分组在一起。另一种组织小部件的方法是使用布局。在下一节中，我们将介绍如何将小部件组织在一起。 \par
+前面的列表不是最终的，但是它给出了Qt功能的基本概念。我们这里使用的地址簿示例使用了许多这样的widget。QTabWidget表示一个组织widget，将几个widget分组在一起。另一种组织widget的方法是使用布局。在下一节中，我们将介绍如何将widget组织在一起。 \par
 
 \noindent\textbf{}\ \par
-\textbf{使用布局组合小部件} \ \par
-Qt为我们提供了一个灵活而简单的平台，我们可以在这个平台上以布局的形式使用小部件排布。这有助于我们确保小部件内部的空间得到有效利用，并提供友好的用户体验。 \par
-让我们来看看布局管理类的基本用法。使用布局管理类的优点是，当容器小部件改变其大小时，它们会自动调整小部件的大小和位置。Qt的布局类的另一个优点是，它们允许我们通过编写代码而不是使用UI编写器来安排小部件。虽然Qt Creator提供了一种很好的手工组合小部件(在屏幕上拖放小部件)的方法，但大多数程序员在实际编写代码来安排小部件的外观和感觉时，会感觉更舒服。假设你也喜欢后一种方法，我们将引入以下布局类: \par
+\textbf{使用布局组合widget} \ \par
+Qt为我们提供了一个灵活而简单的平台，我们可以在这个平台上以布局的形式使用widget排布。这有助于我们确保widget内部的空间得到有效利用，并提供友好的用户体验。 \par
+让我们来看看布局管理类的基本用法。使用布局管理类的优点是，当容器widget改变其大小时，它们会自动调整widget的大小和位置。Qt的布局类的另一个优点是，它们允许我们通过编写代码而不是使用UI编写器来安排widget。虽然Qt Creator提供了一种很好的手工组合widget(在屏幕上拖放widget)的方法，但大多数程序员在实际编写代码来安排widget的外观和感觉时，会感觉更舒服。假设你也喜欢后一种方法，我们将引入以下布局类: \par
 
 \begin{itemize}
 	\item QHBoxLayout
@@ -502,7 +502,7 @@ Qt为我们提供了一个灵活而简单的平台，我们可以在这个平台
 	\item QFormLayout
 \end{itemize}
 
-所有这些类都继承自QLayout，它是几何管理的基类。QLayout是继承自QObject的抽象基类。它没有继承自QWidget，因为它与渲染没有任何关系，但它负责组织应该呈现在屏幕上的小部件。你可能不需要实现你自己的布局管理器，但如果做了，应该继承你的类从QLayout和提供实现以下函数: \par
+所有这些类都继承自QLayout，它是几何管理的基类。QLayout是继承自QObject的抽象基类。它没有继承自QWidget，因为它与渲染没有任何关系，但它负责组织应该呈现在屏幕上的widget。你可能不需要实现你自己的布局管理器，但如果做了，应该继承你的类从QLayout和提供实现以下函数: \par
 
 \begin{itemize}
 	\item addItem()
@@ -513,7 +513,7 @@ Qt为我们提供了一个灵活而简单的平台，我们可以在这个平台
 	\item minimumSize()
 \end{itemize}
 
-这里列出的类足以组成几乎任何复杂性的小部件。更重要的是，我们可以将一种布局放置到另一种布局中，从而实现更灵活的小部件组合。使用QHBoxLayout，我们可以从左到右水平地组织小部件，如下图所示: \par
+这里列出的类足以组成几乎任何复杂性的widget。更重要的是，我们可以将一种布局放置到另一种布局中，从而实现更灵活的widget组合。使用QHBoxLayout，我们可以从左到右水平地组织widget，如下图所示: \par
 
 \begin{center}
 	\includegraphics[width=0.6\textwidth]{content/Section-2/Chapter-14/16}
@@ -538,7 +538,7 @@ window->setLayout(layout);
 window->show();
 \end{lstlisting}
 
-看一下我们在小部件上调用setLayout()函数的那一行。每个小部件都可以分配一个布局。如果没有容器，布局本身就不能发挥多大作用，因此我们需要将其设置为一个小部件，作为有组织的小部件(在本例中是按钮)的容器。QHBoxLayout继承自QBoxLayout，它有我们前面列出的另一个后代——QVBoxLayout。它类似于QHBoxLayout，但垂直组织部件，如下图所示: \par
+看一下我们在widget上调用setLayout()函数的那一行。每个widget都可以分配一个布局。如果没有容器，布局本身就不能发挥多大作用，因此我们需要将其设置为一个widget，作为有组织的widget(在本例中是按钮)的容器。QHBoxLayout继承自QBoxLayout，它有我们前面列出的另一个后代——QVBoxLayout。它类似于QHBoxLayout，但垂直组织部件，如下图所示: \par
 
 \begin{center}
 	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-14/17}
@@ -550,7 +550,7 @@ window->show();
 QVBoxLayout* layout = new QVBoxLayout;
 \end{lstlisting}
 
-GridLayout允许我们将小部件组织成网格，如下图所示: \par
+GridLayout允许我们将widget组织成网格，如下图所示: \par
 
 \begin{center}
 	\includegraphics[width=0.6\textwidth]{content/Section-2/Chapter-14/18}
@@ -566,7 +566,7 @@ layout->addWidget(btn3, 1, 0);
 layout->addWidget(btn4, 1, 1);
 \end{lstlisting}
 
-最后，与QGridLayout类似，QFormLayout在设计输入表单时更有帮助，因为它以两列描述性样式布局小部件。 \par
+最后，与QGridLayout类似，QFormLayout在设计输入表单时更有帮助，因为它以两列描述性样式布局widget。 \par
 我们可以将一个布局组合到另一个布局中。为此，我们需要使用addItem()函数，如下所示: \par
 
 \begin{lstlisting}[caption={}]
@@ -586,16 +586,16 @@ vertical->addItem(horizontal);
 \noindent\textbf{}\ \par
 \textbf{总结} \ \par
 如果你是Qt的新手，这一章可以作为对这个框架的一般介绍。我们讨论了GUI应用程序开发的基础知识，并比较了Java方法和Qt方法。使用Qt最大的优点之一是它支持跨平台开发。虽然Java做了同样的事情，但Qt通过生成平台本地的可执行文件超越了这一点。这使得使用Qt编写的应用程序比使用虚拟机编写的应用程序要快得多。 \par
-我们还讨论了Qt的信号和插槽作为对象间通信的灵活机制。通过使用它，可以在GUI应用程序中设计复杂的通信机制。我们在本章中看到了相当简单的例子，我们也可以自由地试验使用信号和槽的各种方法。我们还熟悉了常见的Qt小部件和布局管理机制。现在，已经基本了解了如何设计最复杂的GUI布局。可以通过应用本章介绍的技术和小部件自由地实现复杂的Qt应用程序。在下一章中，我们将讨论当今的一个热门话题——人工智能和机器学习。 \par
+我们还讨论了Qt的信号和插槽作为对象间通信的灵活机制。通过使用它，可以在GUI应用程序中设计复杂的通信机制。我们在本章中看到了相当简单的例子，我们也可以自由地试验使用信号和槽的各种方法。我们还熟悉了常见的Qtwidget和布局管理机制。现在，已经基本了解了如何设计最复杂的GUI布局。可以通过应用本章介绍的技术和widget自由地实现复杂的Qt应用程序。在下一章中，我们将讨论当今的一个热门话题——人工智能和机器学习。 \par
 
 \noindent\textbf{}\ \par
 \textbf{问题} \ \par
 \begin{enumerate}
 	\item 为什么Qt不需要虚拟机?
 	\item QApplication::exec()函数是做什么的?
-	\item 如何更改顶级小部件的标题?
+	\item 如何更改顶级widget的标题?
 	\item 给定m模型，如何访问第2行和第3列的项?
-	\item 对于wgt小部件，如何将其宽度更改为400，高度更改为450?
+	\item 对于wgtwidget，如何将其宽度更改为400，高度更改为450?
 	\item 当从QLayout继承来创建自己的布局管理器类时，应该实现哪些函数?
 	\item 如何将信号连接到槽上?
 \end{enumerate}
