@@ -1,0 +1,66 @@
+\begin{enumerate}
+	\item 这是一个实验练习。
+	\item 以下是Ubuntu 18.04在NVIDIA Jetson Nano上的输出:
+	\begin{lstlisting}[caption={}]
+	swu@swu-desktop:~/ch13$ g++ -c -Wall -Weffc++ -Wextra
+	ch13_rca_compound.cpp
+	ch13_rca_compound.cpp: In function ‘int main()’:
+	ch13_rca_compound.cpp:11:17: warning: operation on ‘x’ may be
+	undefined [-Wsequence-point]
+	std::cout << f(++x, x) << std::endl; //bad,f(4,4) or f(4,3)?
+	^~~
+	swu@swu-desktop:~/ch13$ g++ -c -Wall -Weffc++ -Wextra
+	ch13_rca_mix_sign_unsigned.cpp
+	nothing is detected
+	swu@swu-desktop:~/ch13$ g++ -c -Wall -Weffc++ -Wextra
+	ch13_rca_order_of_evaluation.cpp
+	ch13_rca_order_of_evaluation.cpp: In constructor ‘A::A(int)’:
+	ch13_rca_order_of_evaluation.cpp:14:14: warning: ‘A::v3’ will be
+	initialized after [-Wreorder]
+	int v1, v2, v3;
+	^~
+	ch13_rca_order_of_evaluation.cpp:14:6: warning: ‘int A::v1’ [-
+	Wreorder]
+	int v1, v2, v3;
+	^~
+	ch13_rca_order_of_evaluation.cpp:7:2: warning: when initialized
+	here [-Wreorder]
+	A(int x) : v2(v1), v3(v2), v1(x) {
+	^
+	ch13_rca_order_of_evaluation.cpp: In constructor ‘B::B(float)’:
+	ch13_rca_order_of_evaluation.cpp:32:6: warning: ‘B::v2’ will be
+	initialized after [-Wreorder]
+	int v2;
+	^~
+	ch13_rca_order_of_evaluation.cpp:31:6: warning: ‘int B::v1’ [-
+	Wreorder]
+	int v1; //good, here the declaration order is clear
+	^~
+	ch13_rca_order_of_evaluation.cpp:25:2: warning: when initialized
+	here [-Wreorder]
+	B(float x) : v2(x), v1(v2) {};
+	^
+	swu@swu-desktop:~/ch13$ g++ -c -Wall -Weffc++ -Wextra
+	ch13_rca_uninit_variable.cpp
+	ch13_rca_uninit_variable.cpp: In function ‘int main()’:
+	ch13_rca_uninit_variable.cpp:7:2: warning: ‘x’ is used
+	uninitialized in this function [-Wuninitialized]
+	if (x) {
+		^~
+	\end{lstlisting}
+	\item 因为静态分析工具从它们的模型中预测错误，而动态分析工具通过程序的执行来检测错误。
+	\item 请参考示例代码ch13\underline{ }tdd\underline{ }v3.h、ch13\underline{ }tdd\underline{ }v3.cpp和ch13\underline{ }tdd\underline{ }Boost\underline{ }UTF3.cpp
+	\\https:/​/github.com/​PacktPublishing/​Mastering-Cpp-Programming.​/tree/master/Chapter-​13
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
