@@ -16,13 +16,13 @@
 
 \noindent\textbf{}\ \par
 \textbf{探索函数和类模板} \ \par
-我们将从介绍函数模板的语法开始，并通过实例化、推断类型和特化开始这一节。然后，我们将转向类模板，看看类似的概念，以及示例。\par
+我们将从介绍函数模板的语法开始，并通过实例化、推断类型和特化开始这一节。然后，转向类模板，看看类似的概念，以及示例。\par
 
 \noindent\textbf{}\ \par
 \textbf{动机} \ \par
 目前为止，定义了函数或类时，必须提供输入、输出和中间参数。例如，有一个函数来执行两个int型整数的加法运算。如何扩展它，使它能够处理所有其他基本数据类型，如float、double、char等？一种方法是通过手动复制、粘贴和稍微修改每个函数来使用函数重载。另一种方法是定义一个宏来执行加法操作。这两种方法都有各自的副作用。 \par
 此外，如果我们修复了一个bug或为一种类型添加了一个新特性，而这个更新需要对所有其他重载函数和类执行，这会导致什么情况？除了使用复制-粘贴-替换的方法，有更好的方法来处理这种情况吗？ \par
-事实上，这是任何计算机语言都可能面临的问题。这个问题由通用函数编程元语言(ML，Meta Language)在1973年提出，ML允许编写仅在使用时的类型集中使用不同的通用函数或类型，从而减少重复代码。后来，受Ada语言中特定生命保证(CLU，hartered life underwriter)提供的参数化模块和泛型的启发，C++采用了模板概念，它允许函数和类使用泛型类型进行操作。换句话说，它允许函数或类处理不同的数据类型，而不需要重新编写它们。 \par
+事实上，这是任何计算机语言都可能面临的问题。这个问题由通用函数编程元语言(ML，Meta Language)在1973年提出，ML允许编写仅在使用时的类型集中使用不同的通用函数或类型，从而减少重复代码。后来，受Ada语言中生命保护(CLU，hartered life underwriter)提供的参数化模块和泛型的启发，C++采用了模板概念，它允许函数和类使用泛型类型进行操作。换句话说，它允许函数或类处理不同的数据类型，而不需要重新编写它们。 \par
 实际上，从抽象的角度来看，C++函数或类模板可以作为创建其他类似函数或类的模式。这背后的基本思想是创建一个函数或类模板，而不必指定某些或所有变量的确切类型。我们使用占位符类型定义函数或类模板，称为模板类型形参。一旦有了函数或类模板，就可以使用在其他编译器中实现的算法自动生成函数或类。 \par
 C++中有三种模板：函数模板、类模板和可变参数模板。接下来我们一个个的来了解。 \par
 
@@ -31,7 +31,7 @@ C++中有三种模板：函数模板、类模板和可变参数模板。接下�
 函数模板定义了如何生成一系列函数。这里是指一组行为相似的函数。如下图所示，这包括两个阶段: \par
 
 \begin{itemize}
-	\item 创建函数模板，如何书写的规则。
+	\item 创建函数模板，书写的规则。
 	\item 模板实例化，从模板中生成函数的规则:
 \end{itemize}
 
@@ -64,7 +64,7 @@ T app_max (T a, T b) {
 \end{lstlisting}
 
 这个函数模板可以用于许多数据类型或类，只要有一个可复制构造的类型，其中表达式是a>b。对于用户定义的类，这意味着必须定义大于操作符(>)。 \par
-注意，函数模板和模板函数是不同的东西。函数模板是一种编译器用来生成函数的模板，因此编译器不会为它生成任何目标代码。另一方面，模板函数是指函数模板中的一个实例。由于它是一个函数，相应的目标代码由编译器生成。然而，最新的C++标准文档建议避免使用不精确的术语定义模板函数。因此，本书中将使用函数模板和成员函数模板。 \par
+注意，函数模板和模板函数是不同的东西。函数模板是一种编译器用来生成函数的模板，因此编译器不会为它生成任何目标代码。另一方面，模板函数是指函数模板中的一个实例。由于它是一个函数，相应的目标代码由编译器生成。然而，最新的C++标准文档建议避免使用不准确的术语定义模板函数。因此，本书将使用函数模板和成员函数模板。 \par
 
 \noindent\textbf{}\ \par
 \textbf{实例化} \ \par
@@ -91,7 +91,7 @@ float app_max<float> (float a, float b) {
 
 \noindent\textbf{}\ \par
 \textbf{显式实例化} \ \par
-很多非常有用的C++函数模板可以在不使用显式实例化的情况下编写和使用，将在这里描述它们，以便在需要时知道它们的存在。首先，看一下C++11之前显式实例化的语法。有两种形式，代码如下所示: \par
+很多非常有用的C++函数模板可以在不使用显式实例化的情况下编写和使用，这里对它们进行了解，以便在需要时知道它们的存在。首先，看一下C++11之前显式实例化的语法。有两种形式，代码如下所示: \par
 
 \begin{lstlisting}[caption={}]
 template return-type
@@ -102,7 +102,7 @@ function_name ( function_parameter_list );
 \end{lstlisting}
 
 显式实例化定义，强制对特定类型的函数模板进行实例化，而不管将来会调用哪个模板函数。显式实例化可以在函数模板定义之后的任何位置，并且对于源代码中的给定参数列表，它只允许出现一次。 \par
-自C++11以来，显式实例化的语法如下所示，我们可以看到关键字extern放在关键字template之前: \par
+C++11之后，显式实例化的语法如下所示，关键字extern放在关键字template之前: \par
 
 \begin{lstlisting}[caption={}]
 extern template return-type
@@ -124,7 +124,7 @@ template int app_max<int>(int, int);
 
 \begin{lstlisting}[caption={}]
 extern template double app_max<double>(double, double); //(since c++11)
-extren template int app_max<int>(int, int); //(since c++11)
+extern template int app_max<int>(int, int); //(since c++11)
 \end{lstlisting}
 
 也可以通过模板参数推导的方式完成: \par
@@ -141,7 +141,7 @@ extern template double f(double, double); //(since c++11)
 extern template int f(int, int); //(since c++11)
 \end{lstlisting}
 
-此外，还有一些用于显式实例化的规则。如果想了解更多，请参考扩展阅读部分的[10]了解更多信息。 \par
+此外，还有一些用于显式实例化的规则。如果想了解更多，请参考扩展阅读部分的了解更多信息。 \par
 
 \noindent\textbf{}\ \par
 \textbf{隐式实例化} \ \par
@@ -172,12 +172,12 @@ int main(){
 
 \noindent\textbf{}\ \par
 \textbf{类型推断} \ \par
-当调用模板函数时，即使不是每个模板实参都指定了，编译器也需要找出具体的实参。大多数情况下，它会从函数参数中推断出缺少的模板参数。例如，在前面函数的B部分中，当在E行中调用app\underline{ }max(5,8)时，编译器将模板实参推断为int类型(int app\underline{ }max<int>(int,int))，因为输入形参5和8都是整数。类似地，行F将被推断为float类型，即float app\underline{ }max<float>(float,float)。 \par
-如果在实例化过程中出现混乱怎么办？例如，前一个程序的G注释掉的行中，根据编译器的不同，可以调用app\underline{ }max<double>(double, double)， app\underline{ }max<int>(int, int)，或者抛出编译错误消息。帮助编译器推断类型的最好方法是通过显式地给出模板实参来调用函数模板。这种情况下，如果调用app\underline{ }max<double>(5,8.0)，任何混淆都将得到解决。 \par
+当调用模板函数时，即使不是每个模板实参都指定了，编译器也需要找出具体的实参。大多数情况下，它会从函数参数中推断出缺少的模板参数。例如，在前面函数的B部分中，当在E行中调用app\underline{ }max(5,8)时，编译器将模板实参推断为int类型(int app\underline{ }max<int>(int,int))，因为输入形参5和8都是整数。类似地，F行会将类型推断为float，即float app\underline{ }max<float>(float,float)。 \par
+如果在实例化过程中出现混乱怎么办？例如，前一个程序的G(注释)行，根据编译器的不同，可以调用app\underline{ }max<double>(double, double)， app\underline{ }max<int>(int, int)，或者抛出编译错误消息。帮助编译器推断类型的最好方法是通过显式地给出模板实参来调用函数模板。这种情况下，如果调用app\underline{ }max<double>(5,8.0)，任何混淆都将得到解决。 \par
 
 \hspace*{\fill} \\ %插入空行
 \includegraphics[width=0.05\textwidth]{images/tip}
-从编译器的角度来看，有几种方法可以进行模板参数推断——从函数调用推断、从类型推断、自动类型推断和上下文[4]。然而，从开发者角度来看，你永远不应该编写花哨的代码来使用函数模板演绎的概念来迷惑其他程序员，比如前面的例子中的第G行。\par
+从编译器的角度来看，有几种方法可以进行模板参数推断——从函数调用推断、从类型推断、自动类型推断和上下文。然而，从开发者角度来看，永远不要编写花哨的代码来使用函数模板来迷惑其他开发者，比如：前面的例子中的第G行。\par
 \noindent\textbf{}\ \par
 
 \noindent\textbf{}\ \par
@@ -270,7 +270,7 @@ f(i, &d); //line G: choose f() defined in line 3
 这里，我们有以下这些方式: \par
 
 \begin{itemize}
-	\item \texttt{template\underline{ }parameter-list}(请参阅进一步阅读上下文[10]中的链接)是一个非空的以逗号分隔的模板形参列表，每个模板形参要么是一个非类型形参，要么是一个类型形参，或是一个模板形参。
+	\item \texttt{template\underline{ }parameter-list}(请参扩展阅读中的链接)是一个非空的以逗号分隔的模板形参列表，每个模板形参要么是一个非类型形参，要么是一个类型形参，或是一个模板形参。
 	\item \texttt{class-declaration}用来声明类，这个类包含一个类名和用花括号括起来的类体。通过这样做，声明的类名也变成了模板名。
 \end{itemize}
 
@@ -294,7 +294,7 @@ public:
 };
 \end{lstlisting}
 
-有了这个类模板，编译器就可以在实例化过程中生成类。由于在函数模板小节中提到的原因，本书中我们将避免使用不精确的术语定义模板类。 \par
+有了这个模板类，编译器就可以在实例化过程中生成类。由于在函数模板小节中提到的原因，本书中我们将避免使用不精确的术语定义模板类。 \par
 
 \noindent\textbf{}\ \par
 \textbf{实例化} \ \par
@@ -423,7 +423,7 @@ class_name<argument list> *p_object_name; //for pointer object
 #include <iostream>
 template <class T>
 class X {
-	public:
+public:
 	X() = default;
 	~X() = default;
 	void f() { std::cout << "X::f()" << std::endl; };
@@ -553,7 +553,7 @@ void main()
 	\end{lstlisting}
 \end{enumerate}
 
-最后，用一个main()函数来测试它。第A行，x1是一个从主模板X<t>隐式实例化的对象。因为x1的初始值。m是5,6将从x1.increase()返回。第B行，x2是从特化模板X<char>和x2的值实例化的对象。m在执行时是b。在调用x2.toUpperCase()之后，‘B’将是返回值。 \par
+最后，用一个main()函数来测试它。第A行，x1是一个从主模板X<t>隐式实例化的对象。因为x1的初始值。m是5,6将从x1.increase()返回。第B行，x2是从特化模板X<char>和x2的值实例化的对象。m在执行时是‘b’，在调用x2.toUpperCase()之后，‘B’将是返回值。 \par
 
 \hspace*{\fill} \\ %插入空行
 \includegraphics[width=0.05\textwidth]{images/tip}
@@ -572,7 +572,7 @@ template <> class[struct] class_name<template argument list> { ... };
 template <> struct X<char> { ... };
 \end{lstlisting}
 
-这里，X之后的<char>标识了我们要为其声明模板类特化的类型。\par
+这里，X之后的<char>标识了要为其声明模板类特化的类型。\par
 此外，在对模板类进行特化时，必须定义所有成员(甚至主模板中相同的成员)，因为在模板特化期间，没有继承主模板。 \par
 接下来，我们将研究部分特化。这是显式专门化的一般表达。与只有模板实参列表的显式特化相比，部分特化同时需要模板形参列表和实参列表。对于模板实例化，如果用户的模板实参列表匹配模板实参的子集，编译器将选择部分特化模板。然后，编译器将生成来部分特化模板的类定义。 \par
 下面的例子中，对于主类模板A，可以在实参列表中为const T部分特化它。注意，它们都有相同的参数列表，即<typename T>: \par
@@ -607,14 +607,13 @@ template <typename T, int N> struct C<T[N]>
 {T type; };
 \end{lstlisting}
 
-同样，类模板的部分特化仍然是类模板。必须分别为其成员函数和数字变量提供定义。\par
+同样，模板类的部分特化仍然是模板类。必须分别为其成员函数和数字变量提供定义。\par
 我们总结一下到目前为止所学的内容。下表中，可以看到函数模板和类模板的比较:\par
-
 
 \begin{table}[h]
 	\begin{tabularx}{\textwidth}{|p{2cm}|X|X|X|}
 		\hline
-		& 函数模板  & 类吗模板  & 注释 \\ 
+		& 函数模板  & 模板类  & 注释 \\ 
 		\hline
 		声明	& \texttt{template <class T1, class T2> void f(T1 a, T2 b){ ... }} & \texttt{template <class T1, class T2> class X { ...};} & 声明中定义了一个函数/类模板，\texttt{<class T1，class T2>}称为模板形参。 \\
 		\hline
@@ -641,7 +640,7 @@ template <typename T, int N> struct C<T[N]>
 这里需要强调五个概念: \par
 
 \begin{itemize}
-	\item \textbf{声明}:需要遵循定义函数或类模板的语法。此时，函数或类模板本身就不是类型、函数或其他实体。换句话说，源文件中只有模板定义，而没有可以编译为目标文件的代码。
+	\item \textbf{声明}:需要遵循定义函数或模板类的语法。此时，函数或模板类本身就不是类型、函数或其他实体。换句话说，源文件中只有模板定义，而没有可以编译为目标文件的代码。
 	\item \textbf{隐式实例化}:对于任何代码，模板必须实例化。此过程中，必须确定模板参数，以便编译器能够生成实际的函数或类。换句话说，这是按需编译的，在给出带有特定模板参数的实例化之前，不会编译模板函数或类的代码。
 	\item \textbf{显式实例化}:告诉编译器使用给定类型实例化模板，而不管是否使用了这些类型。通常，用于提供库。
 	\item \textbf{全特化}:没有模板参数列表(完全定制)。模板特化最有用的一点是可以为特定的类型参数创建特定的模板。
@@ -650,11 +649,11 @@ template <typename T, int N> struct C<T[N]>
 
 \noindent\textbf{}\ \par
 \textbf{了解可变模板} \ \par
-上一节中，学习了如何编写固定数量类型参数的函数或类模板。不过，自C++11以来，标准泛型函数和类模板可以接受数量可变的类型参数，这称为可变参数模板，C++在进一步读取上下文[6]中的扩展。我们将通过示例，了解可变参数模板的语法和用法。 \par
+上一节中，学习了如何编写固定数量类型参数的函数或类模板。不过，自C++11以来，标准泛型函数和类模板可以接受数量可变的类型参数，这称为可变参数模板，C++在进一步读取上下文中的扩展。我们将通过示例，了解可变参数模板的语法和用法。 \par
 
 \noindent\textbf{}\ \par
 \textbf{语法} \ \par
-如果函数或类模板接受零个或多个形参，则可以如下定义: \par
+如果函数或模板类接受零个或多个形参，则可以如下定义: \par
 
 \begin{lstlisting}[caption={}]
 //a class template with zero or more type parameters
@@ -664,7 +663,7 @@ template <typename... Args> class X { ... };
 template <typename... Args> void foo( function param list) { ...}
 \end{lstlisting}
 
-在这里，\texttt{<typename ... Args>}声明了一个参数包。注意，这里Args不是关键字，可以使用任何有效的变量名对其进行替换。前面的类/函数模板可以接受任意数量的typename，作为实例化的参数，如下所示: \par
+在这里，\texttt{<typename ... Args>}声明了一个参数包。注意，这里Args不是关键字，可以使用任何有效的变量名对其进行替换。前面的模板类/函数可以接受任意数量的typename，作为实例化的参数，如下所示: \par
 
 \begin{lstlisting}[caption={}]
 X<> x0; //with 0 template type argument
@@ -726,7 +725,7 @@ int main() {
 }
 \end{lstlisting}
 
-printf()变参数函数可能是C或X++中最有用和最强大的函数。然而，它不是类型安全的。在下面的代码块中，我们将采用类型安全的printf()示例来演示可变参数模板的用法。和往常一样，首先定义一个基函数\texttt{void printf\underline{ }vt(const char *s)}，以结束递归: \par
+printf()变参数函数可能是C和C++中最有用和最强大的函数。然而，它不是类型安全的。在下面的代码块中，我们将采用类型安全的printf()示例来演示可变参数模板的用法。和往常一样，首先定义一个基函数\texttt{void printf\underline{ }vt(const char *s)}，以结束递归: \par
 
 \begin{lstlisting}[caption={}]
 //ch4_8_variadic_printf.cpp part A: base function - recursive end
@@ -740,7 +739,7 @@ void printf_vt(const char *s)
 }
 \end{lstlisting}
 
-然后，它的可变参数模板函数printf\underline{ }vt()中，每当\%命中时，该值就会打印出来，其余的则传递给它的递归，直到基函数:\par
+然后，它的可变参数模板函数printf\underline{ }vt()中，每当有\%时，该值就会打印出来，其余的则传递给它的递归，直到基函数为止: \par
 
 \begin{lstlisting}[caption={}]
 //ch4_8_variadic_printf.cpp part B: recursive function
@@ -782,25 +781,25 @@ p.]ï¿½U can accept 100 parameters (or more), x=10, y=3.600000
 Variadic templates can accept 100 parameters (or more); x=10,y=3.6
 \end{lstlisting}
 
-第一行的开始，可以看到printf()中的一些ASCII字符，因为对应的变量类型\%s应该是一个指向char的指针，但我们给它指定了std::string类型。要解决这个问题，需要传递s.c\underline{ }str()。然而，有了可变参数模板版本函数，就没有这个问题了。此外，只需要提供\%，就好了——至少对于这个实现来说是这样的。 \par
+第一行的开始，可以看到printf()中的一些ASCII字符，因为对应的变量类型\%s应该是一个指向char的指针，但我们给它指定了std::string类型。要解决这个问题，需要传递s.c\underline{ }str()。然而，有了可变参数版本函数，就没有这个问题了。此外，只需要提供\%，就好了——至少对于这个实现来说是这样的。 \par
 
 总之，本节简要介绍了可变参数模板及其应用。可变参数模板有以下优点(自C++ 11以来): \par
 
 \begin{itemize}
-	\item 是模板家族的一个轻量级扩展
+	\item 模板的轻量级扩展
 	\item 演示了在不使用模板和预处理宏的情况下实现模板库的能力。因此，代码能够理解和调试，同时也节省了编译时间。
 	\item 支持printf()可变参数函数的类型安全实现。
 \end{itemize}
 
-接下来，我们将探讨模板参数和参数。\par
+接下来，我们将探讨模板形参和参数。\par
 
 \noindent\textbf{}\ \par
 \textbf{探索模板形参和参数} \ \par
-前两节中学习了函数和类模板以及它们的实例化。在定义模板时，需要给出它的形参列表。当实例化时，必须提供相应的参数列表。本节中，将进一步研究这两个列表的分类和细节。 \par
+前两节中学习了函数和模板类以及它们的实例化。在定义模板时，需要给出形参列表。当实例化时，必须提供相应的参数列表。本节中，将进一步研究这两个列表的分类和细节。 \par
 
 \noindent\textbf{}\ \par
 \textbf{模板参数} \ \par
-回想一下下面的语法，它是用来定义类/函数模板的。模板关键字后面有一个<>符号，必须给出一个或多个模板形参: \par
+回想一下下面的语法，它是用来定义模板类/函数的。模板关键字后面有一个<>符号，必须给出一个或多个模板形参: \par
 
 \begin{lstlisting}[caption={}]
 //class template declaration
@@ -815,7 +814,7 @@ template <parameter-list> function-declaration
 \begin{itemize}
 	\item 非类型模板形参:指引用静态实体的编译时常量值，如整数和指针。这些参数通常称为非类型参数。 
 	\item 类型模板形参:它引用内置类型名或用户定义的类。
-	\item 模板模板参数:表示该参数为其他模板。
+	\item 模板的模板参数:表示该参数为其他模板。
 \end{itemize}
 
 我们将在下面的小节中更详细地讨论这些问题。 \par
@@ -836,7 +835,7 @@ type name(optional)=default
 type ... name(optional) (since C++11)
 \end{lstlisting}
 
-这里，类型是以下类型之一——整型、枚举、指向对象或函数的指针、指向对象或函数的左值引用、指向成员对象或成员函数的指针，以及std::nullptr\underline{ }t(自C++11起)。此外，可以在模板声明中放入数组和/或函数类型，它们会被数据和/或函数指针自动替换。 \par
+这里，类型是以下类型之一——整型、枚举、指向对象或函数的指针、指向对象或函数的左值引用、指向成员对象或成员函数的指针，以及std::nullptr\underline{ }t(C++11)。此外，可以在模板声明中放入数组和/或函数类型，它们会被数据和/或函数指针自动替换。 \par
 下面的示例显示了一个使用非类型模板形参int N的类模板。main()中实例化并创建了一个对象x，因此x.a有五个初始值为1的元素。将第四个元素的值设置为10之后，输出结果:\par
 
 \begin{lstlisting}[caption={}]
@@ -894,7 +893,7 @@ main()中成功地用str1和str2实例化了foo()，它们都是编译时常量�
 	\item Line 5:  str5不是const char*类型的有效模板实参，因为它没有链接。
 \end{itemize}
 
-非类型形参的另一种最常见用法是使用数组的大小。如果你想了解更多，请访问 https:/​/​stackoverflow.​com/​questions/​33234979 
+非类型形参的另一种最常见用法是使用数组的大小。如果你想了解更多，请访问\\ https://stackoverflow.com/questions/​33234979 
 
 \noindent\textbf{}\ \par
 \textbf{模板参数类型} \ \par
@@ -948,7 +947,7 @@ typename[class] ... name(optional) (since C++11)
 模板形参包可以接受零个或多个模板形参，并且只在C++11以后有效。 \par
 
 \noindent\textbf{}\ \par
-\textbf{模板模板参数} \ \par
+\textbf{模板的模板参数} \ \par
 模板参数template的语法如下: \par
 
 \begin{lstlisting}[caption={}]
@@ -987,6 +986,7 @@ questions/​213761)
 #include <vector>
 #include <deque>
 #include <list>
+
 using namespace std;
 template<class T, template<class, class...> class X, class... Args>
 std::ostream& operator <<(std::ostream& os, const X<T, Args...>& objs) {
@@ -995,6 +995,7 @@ std::ostream& operator <<(std::ostream& os, const X<T, Args...>& objs) {
 	os << obj << ' ';
 	return os;
 }
+
 int main() {
 	vector<float> x{ 3.14f, 4.2f, 7.9f, 8.08f };
 	cout << x << endl;
@@ -1006,7 +1007,7 @@ int main() {
 }
 \end{lstlisting}
 
-上述程序的输出如下:
+上述程序的输出如下所示:
 
 \begin{lstlisting}[caption={}]
 class std::basic_ostream<char,struct std::char_traits<char> > &__cdecl
@@ -1075,8 +1076,8 @@ W<&g> w; //line g: ok: overload resolution selects g(int)
 前面第1部分的代码中，我们定义了三个具有不同非类型模板形参的模板结构。然后，第2部分中，声明了两个重载函数和结构体Y。最后，第3部分中，讨论了通过不同的非类型参数来实例化它们的正确方法。\par
 
 \noindent\textbf{}\ \par
-\textbf{模板类型参数} \ \par
-与模板的非类型实参相比，模板类型实参(用于类型模板形参)的规则很简单，必须是typeid。在这里，typeid是一个标准C++操作符，会在运行时返回类型标识信息。它基本上返回一个type\underline{ }info对象，可以与其他type\underline{ }info对象进行比较。 \par
+\textbf{模板类型的参数} \ \par
+与模板的非类型实参相比，模板类型实参(用于类型模板形参)的规则很简单，必须是typeid。在这里，typeid是一个标准C++操作符，会在运行时返回类型标识信息。它返回一个type\underline{ }info对象，可以与其他type\underline{ }info对象进行比较。 \par
 看看下面的例子: \par
 
 \begin{lstlisting}[caption={}]
@@ -1206,7 +1207,7 @@ int main() {
 
 \begin{itemize}
 	\item 声明顺序很重要——默认模板实参的声明必须在主模板声明的顶部。例如，在前面的示例中，不能将第3行和第4行代码移到第9行之后。
-	\item 如果一个形参有一个默认实参，那么它之后的所有形参也必须有默认实参。例如，以下代码不正确:
+	\item 如果一个形参有一个默认实参，那么它之后的所有形参也必须有默认实参。例如，以下代码是不正确的:
 	\begin{lstlisting}[caption={}]
 	template<class U = char, class V, class W = int> class X { }; //Error
 	template<class V, class U = char, class W = int> class X { }; //OK
@@ -1226,7 +1227,7 @@ int main() {
 还要了解了另外两条重要的规则: \par
 
 \begin{itemize}
-	\item 定义类或函数模板时，需要给出它的template\underline{ }parameter\underline{ }list:
+	\item 定义模板类或函数时，需要给出它的template\underline{ }parameter\underline{ }list:
 	\begin{lstlisting}[caption={}]
 	template <template_parameter_list>
 	class X { ... }
@@ -1241,12 +1242,12 @@ int main() {
 	\end{lstlisting}
 \end{itemize}
 
-这两个列表中的形参或实参类型可以分为三类，如下表所示。注意，虽然第一行是类模板，但这些属性也适用于函数模板: \par
+这两个列表中的形参或实参类型可以分为三类，如下表所示。注意，虽然第一行是模板类，但这些属性也适用于模板函数: \par
 
 \begin{table}[h]
 	\begin{tabularx}{\textwidth}{|p{2cm}|X|X|}
 		\hline
-		& 定义模板时 template <template\_parameter\_list> class X \{ ... \} & 当实例化一个模板时class X<template\_argument\_list> x \\ 
+		& 定义模板时 template <template\_parameter\_list> class X \{ ... \} & 实例化一个模板时class X<template\_argument\_list> x \\ 
 		
 		\hline
 		非类型
@@ -1285,7 +1286,7 @@ int main() {
 		\begin{itemize}
 			\item template <parameter-list> class name
 			\item template <parameter-list> class ... name
-			(可选) (自C++11起)
+			(可选) (C++11)
 		\end{itemize} 
 		& 
 		列表中的模板参数是类模板的名称 \\
@@ -1366,7 +1367,7 @@ struct is_pointer< T* >{ //<T*> means partial specialization only for type
 is_pointer<T>::value
 \end{lstlisting}
 
-由于boost类型特征特性已经正式引入到C++11标准库中，我们可以在以下示例中展示std::is\underline{ }void和std::is\underline{ }pointer的用法，而不需要包含前面示例中的源代码: \par
+由于boost类型特征特性已经正式加入到C++11标准库中，我们可以在以下示例中展示std::is\underline{ }void和std::is\underline{ }pointer的用法，而不需要包含前面示例中的源代码: \par
 
 \begin{lstlisting}[caption={}]
 //ch4_15_traits_boost.cpp
@@ -1393,7 +1394,7 @@ int main()
 
 \noindent\textbf{}\ \par
 \textbf{利用特征优化算法} \ \par
-我们将使用一个优化复制的示例，来展示类型特征的用法，而不是通过的抽象方式来讨论这个主题。使用标准库中的copy算法: \par
+我们将使用一个优化复制的示例，来展示类型特征的用法，而不是通过的抽象方式来讨论。使用标准库中的copy算法: \par
 
 \begin{lstlisting}[caption={}]
 template<typename It1, typename It2>
@@ -1476,10 +1477,10 @@ inline I2 copy(I1 first, I1 last, I2 out) {
 最后，让我们总结一下: \par
 
 \begin{itemize}
-	\item 除了类型之外，特征还提供了其他信息，并通过模板特化实现的。
+	\item 除了类型之外，特征还提供了其他信息，并通过模板特化实现的
 	\item 按照惯例，特征总是作为结构来实现的。用于实现特征的结构称为特征类
-	\item Bjarne Stroustrup说，我们应该把特征看作一个小对象，它的主要目的是携带另一个对象或算法，从而确定策略或实现细节的信息。进一步阅读可参考[4]
-	\item Scott Meyers还总结说，我们应该使用特征类来收集信息，进一步阅读可参考[5]
+	\item Bjarne Stroustrup说，我们应该把特征看作一个小对象，它的主要目的是携带另一个对象或算法，从而确定策略或实现细节的信息
+	\item Scott Meyers还总结说，我们应该使用特征类来收集信息
 	\item 特征可以帮助我们以一种高效/优化的方式实现通用算法
 \end{itemize}
 
@@ -1489,7 +1490,7 @@ inline I2 copy(I1 first, I1 last, I2 out) {
 \textbf{探索模板元编程} \ \par
 一种计算机程序能够把其他程序当作它们的数据来处理的编程技术，称为元编程。程序可以设计成读取、生成、分析或转换其他程序，甚至在运行时修改自己。元编程的一种是编译器，将文本格式程序作为输入语言(C、Fortran、Java等)，并以输生成另一种二进制机器码格式。\par
 C++模板元编程(TMP)是指在C++中使用模板生成元程序。其有两个条件——必须定义一个模板，以及必须实例化一个已定义的模板。TMP是图灵完备的，这意味着它有能力计算任何可计算的东西。另外，由于TMP中的变量都是不可变的(变量是常量)，所以使用递归，而不是迭代来处理集合中的元素。 \par
-为什么需要TMP？因为它可以加快我们的程序在执行时间!但由于在优化世界中没有免费的午餐，我们为TMP付出的代价不再是编译时和/或更大的二进制代码大小。另外，并不是所有的问题都可以用TMP解决，只有当我们计算的是编译时不变的东西时，才会起作用，例如：找出所有小于一个常数整数的所有数、一个常数整数的阶乘、展开一个常数数量的循环或迭代等。 \par
+为什么需要TMP？因为它可以加快我们的程序在执行时间!由于在优化中没有免费的午餐，我们为TMP付出的代价不再是编译时和/或更大的二进制代码大小。另外，并不是所有的问题都可以用TMP解决，只有当我们计算的是编译时不变的才会起作用，例如：找出所有小于一个常数整数的所有数、一个常数整数的阶乘、展开一个常数数量的循环或迭代等。 \par
 从实用的角度来看，模板元编程能够解决以下三类问题:编译时计算、编译时优化，以及静态多态性。下面的小节中，我们将提供来自每个类别的示例，以演示元编程的工作原理。 \par
 
 \noindent\textbf{}\ \par
@@ -1553,9 +1554,7 @@ int main() {
 fact<10>::value = 10* fact<9>::value;
 fact<10>::value = 10* 9 * fact<8>::value;
 fact<10>::value = 10* 9 * 8 * fact<7>::value;
-.
-.
-.
+...
 fact<10>::value = 10* 9 * 8 *7*6*5*4*3*2*fact<1>::value;
 fact<10>::value = 10* 9 * 8 *7*6*5*4*3*2*1*fact<0>::value;
 ...
@@ -1578,13 +1577,14 @@ with non-static storage duration cannot be used as a non-type argument  \end{lst
 
 \noindent\textbf{}\ \par
 \textbf{编译时优化} \ \par
-虽然前面的示例可以在编译时计算常数整数的阶乘，但可以使用运行时循环展开两个-n向量的点积(其中n在编译时是已知的)，传统的长度-n向量的好处是展开循环是可行的。 \par
+虽然前面的示例可以在编译时计算常数整数的阶乘，但可以使用运行时循环展开两个n维向量的点积(其中n在编译时是已知的)，n维向量的好处是可循环展开的。 \par
 以传统的点积函数模板为例，可以采用以下方式实现: \par
 
 \begin{lstlisting}[caption={}]
 //ch4_19_loop_unoolling_traditional.cpp
 #include <iostream>
 using namespace std;
+
 template<typename T>
 T dotp(int n, const T* a, const T* b)
 {
@@ -1594,6 +1594,7 @@ T dotp(int n, const T* a, const T* b)
 	}
 	return ret;
 }
+
 int main()
 {
 	float a[5] = { 1, 2, 3, 4, 5 };
@@ -1608,6 +1609,7 @@ int main()
 \begin{lstlisting}[caption={}]
 //ch4_20_loop_unroolling_metaprogramming.cpp
 #include <iostream>
+
 //primary template declaration
 template <int N, typename T>
 class dotp {
@@ -1616,6 +1618,7 @@ class dotp {
 		return (*a) * (*b) + dotp<N - 1, T>::result(a + 1, b + 1);
 	}
 };
+
 //partial specialization for end condition
 template <typename T>
 class dotp<1, T> {
@@ -1624,6 +1627,7 @@ class dotp<1, T> {
 		return (*a) * (*b);
 	}
 };
+
 int main()
 {
 	float a[5] = { 1, 2, 3, 4, 5 };
@@ -1659,6 +1663,7 @@ dotp<5, float>::result( a, b)
 \begin{lstlisting}[caption={}]
 //ch4_21_polymorphism_traditional.cpp
 #include <iostream>
+
 class B{
 	public:
 	B() = default;
@@ -1666,6 +1671,7 @@ class B{
 		std::cout << "alg() in B";
 	}
 };
+
 class D : public B{
 	public:
 	D() = default;
@@ -1673,6 +1679,7 @@ class D : public B{
 		std::cout << "alg() in D";
 	}
 };
+
 int main()
 {
 	//derived object pointer p as an instance pointer of the base class
@@ -1688,16 +1695,19 @@ int main()
 \begin{lstlisting}[caption={}]
 //ch4_22_polymorphism_metaprogramming.cpp
 #include <iostream>
+
 template <class D> struct B {
 	void ui() {
 		static_cast<D*>(this)->alg();
 	}
 };
+
 struct D : B<D> {
 	void alg() {
 		cout << "D::alg()" << endl;
 	}
 };
+
 int main(){
 	B<D> b;
 	b.ui();
@@ -1706,13 +1716,13 @@ int main(){
 \end{lstlisting}
 
 总之，模板元编程的一般思想是让编译器在编译时做一些计算。通过这种方式，可以在一定程度上解析运行时开销。之所以能在编译期间计算一些东西，是因为有些东西在运行前是常量。 \par
-如[14]中提到的，C++TMP是在编译时执行计算任务的一种非常强大的方法。第一种方法必须非常小心地处理编译错误，因为模板树是展开的。从实用的角度来看，boost元编程库(MPL)是一个很好的入门参考，以通用的方式为算法、序列和元函数提供了编译时TMP框架。此外，C++17中新的std::variant和std::visit特性，可以用于没有相关类型共享继承类型接口的静态多态性。 \par
+C++TMP是在编译时执行计算任务的一种非常强大的方法。第一种方法必须非常小心地处理编译错误，因为模板树是展开的。从实用的角度来看，boost元编程库(MPL)是一个很好的入门参考，以通用的方式为算法、序列和元函数提供了编译时TMP框架。此外，C++17中新的std::variant和std::visit特性，可以用于没有相关类型共享继承类型接口的静态多态性。 \par
 
 \noindent\textbf{}\ \par
 \textbf{总结} \ \par
 本章中，讨论了C++中泛型编程相关的主题。从回顾C宏和函数重载开始，介绍了C++模板开发的动机。然后，给出了带有固定数量参数的类和函数模板的语法，以及特化和实例化。自C++11以来，可变参数模板被标准泛型函数模板和类模板所接受。在此基础上，进一步将模板形参和实参分为三类:非类型模板形参/实参、类型模板形参/实参和模板模板形参/实参。 \par
 还了解了特征和模板元编程。作为模板特化的副产品，特征类可以为提供更多关于类型的信息。在类型信息的帮助下，最终让实现泛型算法的优化成为可能。类和/或函数模板的另一个应用是在编译时通过递归计算一些常量任务，称为模板元编程。有能力执行编译时计算和/或优化，以及避免在运行时查找虚拟表。 \par
-现在，应该对模板有了深刻的理解。应该能够在应用程序中创建自己的函数和类模板，并实践使用特征来优化算法，并使用模板元编程来执行编译时计算，以获得额外的优化。 \par
+现在，对模板有了深刻的理解，应该能够在应用程序中创建自己的函数和类模板，并实践使用特征来优化算法，并使用模板元编程来执行编译时计算，以获得额外的优化。 \par
 下一章中，我们将了解与内存和管理相关的主题，例如：内存访问的概念、内存分配和回收技术，以及垃圾收集基础知识。这是C++的特性，因此每个C++开发者都必须理解它。 \par
 
 \noindent\textbf{}\ \par
@@ -1720,7 +1730,7 @@ int main(){
 \begin{enumerate}
 	\item 宏的副作用是什么?
 	\item 什么是类/函数模板?什么是模板类/函数?
-	\item 什么是模板参数列表?什么是模板参数列表?一旦有了类模板，就可以显式或隐式地实例化它。在什么样的场景中需要显式实例化?
+	\item 什么是模板参数列表?什么是模板参数列表?有了类模板，就可以显式或隐式地实例化它。在什么样的场景中需要显式实例化?
 	\item 多态性在C++中意味着什么?函数重载和函数重写之间的区别是什么?
 	\item 什么是类型特征?我们如何实现类型特征?
 	\item 在ch4\underline{ }5\underline{ }class\underline{ }template\underline{ }implicit\underline{ }inst\underline{ }B.cpp文件中，我们讨论过隐式实例化生成X<int>类，然后创建xi对象并生成X<int>::f()函数，而不是X<int>::g()。如何验证X<int>::g()没有生成?
