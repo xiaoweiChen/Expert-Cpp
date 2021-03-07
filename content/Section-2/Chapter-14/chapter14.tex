@@ -1,4 +1,4 @@
-C++不提供开箱即用的图形用户界面(GUI)编程。首先，我们应该理解GUI与特定的操作系统(OS)紧密相连。可以在Windows中使用Windows API编写GUI应用程序，也可以在Linux中使用特定于Linux的API编写GUI应用程序等。每个操作系统都有自己特定形式的Windows和GUI组件。 \par
+C++不提供即用的图形用户界面(GUI)编程。首先，我们应该理解GUI与特定的操作系统(OS)紧密相连。可以在Windows中使用Windows API编写GUI应用程序，也可以在Linux中使用特定于Linux的API编写GUI应用程序等。每个操作系统都有自己特定形式的Windows和GUI组件。 \par
 我们在第1章中讨论了不同的平台及其差异。当讨论GUI编程时，平台之间的差异更加令人生畏。跨平台开发已经成为GUI开发人员生活中的一大难题。他们必须专注于特定的操作系统。为其他平台实现相同的应用程序再次花费了几乎相同的工作量。这是对时间和资源的巨大浪费。Java等语言提供了在虚拟环境中运行应用程序的智能模型。这允许开发人员专注于一种语言和一个项目，因为环境负责在不同平台上运行应用程序。这种方法的一个主要缺点是强迫用户安装虚拟机，并且与特定于平台的应用程序相比，执行时间较慢。 \par
 为了解决这些问题，创建了Qt框架。在本章中，我们将了解Qt框架如何支持跨平台GUI应用程序开发。要做到这一点，您需要熟悉Qt及其关键特性。这将允许您使用您最喜欢的编程语言——C++开发GUI应用程序。我们将从理解Qt的GUI开发方法开始，然后我们将涵盖它的概念和特性，如信号和槽，以及模型/视图编程。 \par
 
@@ -13,7 +13,7 @@ C++不提供开箱即用的图形用户界面(GUI)编程。首先，我们应该
 
 \noindent\textbf{}\ \par
 \textbf{编译器要求} \ \par
-您将需要安装最新的Qt框架来运行本章中的示例。我们建议使用Qt Creator作为你的项目的IDE。要下载Qt以及相应的工具，请访问Qt .io网站并选择该框架的开源版本。。可以从这里获取本章的源码文件：https:/​/github.​com/PacktPublishing/Expert-CPP \par
+您将需要安装最新的Qt框架来运行本章中的示例。我们建议使用Qt Creator作为你的项目的IDE。要下载Qt以及相应的工具，请访问Qt .io网站并选择该框架的开源版本。可以从这里获取本章的源码文件：https:/​/github.​com/PacktPublishing/Expert-CPP \par
 
 \noindent\textbf{}\ \par
 \textbf{理解跨平台GUI编程} \ \par
@@ -80,7 +80,7 @@ Qt是一个流行的用于创建GUI应用程序的工具包。它允许我们创
 	\item Qt Widgets: 用C++ widget扩展Qt GUI的类
 	\item Qt Multimedia: 音频、视频、广播和相机功能的课程
 	\item Qt Multimedia Widgets: 用于实现多媒体功能的类
-	\item Qt Network: 网络编程类(我们将在本章中使用它们)
+	\item Qt Network: 网络编程类(我们将在本章中使用)
 	\item Qt Modeling Language (QML): 用于构建具有自定义用户界面的应用程序的声明性框架
 	\item Qt SQL: 使用SQL集成数据库的类
 	\item Qt Quick family of modules: 本书中不会讨论的QML相关的模块。
@@ -112,7 +112,7 @@ unix {
 \end{lstlisting}
 
 当我们在Windows环境中构建应用程序时，windows\underline{ }specific.cpp文件将参与构建。相反，在Unix环境中构建时，将包含linux\underline{ }world.cpp文件，忽略windows\underline{ }specific.cpp文件。至此，我们遇到了Qt应用程序的编译模型。 \par
-Qt提供跨平台编程的强大能力的全部意义在于元编译源代码，在代码被传递给C++编译器之前，Qt编译器通过引入或替换特定于平台的组件来清理代码。例如，当我们使用一个按钮组件(QPushButton)时，如果在Windows环境中编译，它将被一个特定于Windows的按钮组件所取代。这就是为什么.pro文件也可以包含项目特定于平台的修改。下面的图表描述了这一过程: \par
+Qt提供跨平台编程的强大能力的全部意义在于元编译源代码，在代码传递给C++编译器之前，Qt编译器通过引入或替换特定于平台的组件来清理代码。例如，当我们使用一个按钮组件(QPushButton)时，如果在Windows环境中编译，它将被Windows的按钮组件所取代。这就是为什么.pro文件也可以包含项目特定于平台的修改。下面的图表描述了这一过程: \par
 
 \begin{center}
 	\includegraphics[width=1.0\textwidth]{content/Section-2/Chapter-14/4}
@@ -143,8 +143,8 @@ int main(int argc, char** argv)
 	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-14/5}
 \end{center}
 
-我们只声明了QPushButton类，但它显示为一个带有操作系统标准的关闭和最小化按钮的窗口(在示例中，这是macOS)。这样做的原因是QPushButton间接继承自QWidget，它是一个带有框架的widget，也就是一个窗口。这个按钮几乎占据了整个窗口的空间。我们可以调整窗口的大小，看看按钮是如何随它一起调整大小的。我们将在本章后面更详细地讨论widget。 \par
-当我们运行app.exec()时，GUI就会构建。注意app对象的类型。它是一个QApplication对象。这是Qt应用程序的起点。当我们调用exec()函数时，我们开始Qt的事件循环。为了理解GUI应用程序的生命周期，我们应该稍微改变一下对程序执行的看法。在第7章之后，重新定义程序构造和执行的概念并不奇怪这里需要了解的主要内容是GUI应用程序有一个与主程序一起运行的额外实体。这个实体称为事件循环。 \par
+我们只声明了QPushButton类，但它显示为一个带有操作系统标准的关闭和最小化按钮的窗口(示例环境为macOS)。这样做的原因是QPushButton间接继承自QWidget，它是一个带有框架的widget，也就是一个窗口。这个按钮几乎占据了整个窗口的空间。我们可以调整窗口的大小，看看按钮是如何随它一起调整大小的。我们将在本章后面更详细地讨论widget。 \par
+当我们运行app.exec()时，GUI就会构建。注意app对象的类型。它是一个QApplication对象。这是Qt应用程序的起点。当我们调用exec()函数时，我们开始Qt的事件循环。为了理解GUI应用程序的生命周期，我们应该稍微改变一下对程序执行的看法。在第7章之后，重新定义程序构造和执行的概念并不奇怪这里需要了解的主要内容是GUI应用程序有一个与主程序一起运行的实体。这个实体称为事件循环。 \par
 
 \hspace*{\fill} \\ %插入空行
 \includegraphics[width=0.05\textwidth]{images/tip}
@@ -196,11 +196,11 @@ int main(int argc, char** argv)
 	\includegraphics[width=0.4\textwidth]{content/Section-2/Chapter-14/7}
 \end{center}
 
-窗口对象是QWidget类型的。QWidget是所有用户界面对象的中心类。无论何时您想要创建一个自定义widget或扩展一个现有的widget，您都可以直接或间接地从QWidget继承。它为每个用例提供了很多功能。您可以使用move()函数在屏幕中移动它，也可以通过调用showFullScreen()使窗口全屏等。在前面的代码中，我们调用了resize()函数，该函数获取widget的宽度和高度以调整其大小。另外，请注意setWindowTitle()函数，它执行tin上所说的操作——它将传递的字符串参数设置为窗口的标题。在代码中使用字符串值时，最好使用QApplication::translate()函数。它使程序的本地化变得更容易，因为当语言设置改变时，Qt会自动用正确的翻译替换文本。QObject::tr()提供了相同的功能。 \par
+窗口对象是QWidget类型的。QWidget是所有用户界面对象的中心类。无论何时您想要创建一个自定义widget或扩展一个现有的widget，您都可以直接或间接地从QWidget继承。它为每个用例提供了很多功能。您可以使用move()函数在屏幕中移动它，也可以通过调用showFullScreen()使窗口全屏等。在前面的代码中，我们调用了resize()函数，该函数获取widget的宽度和高度以调整其大小。另外，请注意setWindowTitle()函数——将传递的字符串参数设置为窗口的标题。在代码中使用字符串值时，最好使用QApplication::translate()函数。它使程序的本地化变得更容易，因为当语言设置改变时，Qt会自动用正确的翻译替换文本。QObject::tr()提供了相同的功能。 \par
 
 \hspace*{\fill} \\ %插入空行
 \includegraphics[width=0.05\textwidth]{images/warn}
-QObject是所有Qt类型的基类。在Java或C\#这样的语言中，每个对象都直接或间接地继承自泛型类型，大多数是命名对象(C++不包含公共基类)。另一方面，Qt引入了QObject，它附带了所有对象都应该支持的基本功能。 \par
+QObject是所有Qt类型的基类。在Java或C\#这样的语言中，每个对象都直接或间接地继承自泛型类型，大多数是命名对象(C++不包含公共基类)。Qt引入了QObject，它附带了所有对象都应该支持的基本功能。 \par
 \noindent\textbf{}\ \par
 
 现在我们已经接触了Qt应用程序开发的基础知识，让我们深入了解一下这个框架并发现它的关键特性。 \par
@@ -224,7 +224,7 @@ bool disconnect(const QObject* sender, const char* signal,
 	const QObject* receiver, const char* method);
 \end{lstlisting}
 
-如您所见，connect()函数将接收方和发送方对象作为参数。此外，它还接受信号和槽的名称。信号是与发送方相关联的，而插槽是接收方提供的。下图说明了这一点:  \par
+connect()函数将接收方和发送方对象作为参数。此外，它还接受信号和槽的名称。信号是与发送方相关联的，而插槽是接收方提供的。下图说明了这一点:  \par
 
 \begin{center}
 	\includegraphics[width=1.0\textwidth]{content/Section-2/Chapter-14/8}
@@ -604,7 +604,7 @@ vertical->addItem(horizontal);
 \textbf{扩展阅读} \ \par
 \begin{itemize}
 	\item Qt5 C++ GUI Programming Cookbook by Lee Zhi Eng:  https:/​/​www.​packtpub.​com/application-​development/​qt5-​c-​gui-​programming-​cookbook-​second-​edition
-	\item Mastering Qt5 by Guillaume Lazar, Robin Penea:  https:/​/​www.​packtpub.​com/web-​development/​mastering-​qt-​5-​second-​edition
+	\item Mastering Qt5 by Guillaume Lazar, Robin Penea: \\ https:/​/​www.​packtpub.​com/web-​development/​mastering-​qt-​5-​second-​edition
 \end{itemize}
 
 \newpage
